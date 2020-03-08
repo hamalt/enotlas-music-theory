@@ -1,10 +1,21 @@
 <template>
-  <div>
+  <div class="site-wrapper">
     <nuxt />
+		<sidebar class="site-sidebar" />
   </div>
 </template>
 
-<style>
+<script>
+import Sidebar from '~/components/Sidebar.vue'
+
+export default {
+  components: {
+    Sidebar
+  }
+}
+</script>
+
+<style lang="scss">
 html {
   font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI',
     Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -24,13 +35,27 @@ html {
   margin: 0;
 }
 
+.site-wrapper {
+	display: flex;
+	justify-content: space-between;
+}
+
+.site-sidebar {
+
+}
+
 .button--green {
   display: inline-block;
-  border-radius: 4px;
   border: 1px solid #3b8070;
   color: #3b8070;
   text-decoration: none;
   padding: 10px 30px;
+}
+
+.test {
+	a {
+		color: #fff;
+	}
 }
 
 .button--green:hover {
