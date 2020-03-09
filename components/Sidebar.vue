@@ -18,6 +18,8 @@ export default {
 }
 </script>
 
-<style>
-
+<style lang="scss">
+select {
+	width: 100%;
+}
 </style>

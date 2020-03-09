@@ -1,6 +1,7 @@
 <template>
   <div class="container">
     <div>
+			<div id="paper"></div>
       <logo />
       <h1 class="title">
         enotlas-music-theory
@@ -25,11 +26,23 @@
 </template>
 
 <script>
+import abcjs from 'abcjs'
 import Logo from '~/components/Logo.vue'
 
 export default {
   components: {
     Logo
+	},
+	mounted() {
+		abcjs.renderAbc(
+			"paper",
+			"X:1\nK:D\nDDAA|BBA2|\n",
+			{},
+			{
+				// responsive: 'resize',
+				staffwidth: '1000'
+			}
+		);
   }
 }
 </script>
