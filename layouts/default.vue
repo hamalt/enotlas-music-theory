@@ -19,7 +19,6 @@ export default {
 
 <style lang="scss">
 .site-wrapper {
-	opacity: 1;
 	display: flex;
 	justify-content: space-between;
 }
