@@ -37,7 +37,7 @@ export default {
 	/*
 	 ** Plugins to load before mounting the App
 	 */
-	plugins: ['@/plugins/abcjs'],
+	// plugins: ['@/plugins/vexflow.js'],
 	/*
 	 ** Nuxt.js dev-modules
 	 */
@@ -62,6 +62,40 @@ export default {
 		/*
 		 ** You can extend webpack config here
 		 */
+		transpile: [
+			// "@nuxtjs/style-resources",
+			// "@nuxtjs/axios",
+			// "nuxt-svg-loader",
+			// "lodash/debounce",
+			// "loadash",
+			// "lodash/find",
+			// "wp-nuxt",
+			// "util/object-reduce",
+			// "wpapi",
+			// "vue-infinite-loading"
+			// "vue-disqus"
+		],
+		babel: {
+			presets: [
+				[
+					"@nuxt/babel-preset-app",
+					{
+						targets: {
+							ie: "11"
+						},
+						useBuiltIns: "usage",
+						corejs: {
+							version: 2
+						}
+					}
+				]
+			],
+			plugins: [
+				// "@babel/plugin-proposal-object-rest-spread"
+				"@babel/plugin-transform-shorthand-properties"
+			],
+			sourceType: "unambiguous"
+		},
 		extend(config, ctx) {}
 	}
 }
