@@ -25,7 +25,7 @@
 
       <label>
         <span>Scale</span>
-        <select v-model="scale" name="scale">
+        <select v-model="scaleName" name="scale">
           <option value="major">(Melodic) Major</option>
           <option value="MelodicMajor">Hormonic Major</option>
           <option value="d">Natural Minor</option>
@@ -35,6 +35,13 @@
       </label>
 
       <div :id="musicalScoreId"></div>
+
+      <dl id="musical-scores">
+        <template v-for="scale in scales">
+          <dt :key="scale.name">{{ scale.title }}</dt>
+          <dd :key="scale.name" :id="scale.name"></dd>
+        </template>
+      </dl>
     </div>
   </div>
 </template>
@@ -52,68 +59,63 @@ export default {
       musicalScoreDom: Object,
       key: "C",
       accidental: "",
-      scale: "major",
-      scaleList: Object,
-      scaleOrder: ["c", "d", "e", "f", "g", "a", "b"],
-      // scaleNotes: {
-      //   type: Array,
-      //   default: () => []
-      // }
-      VF: Object,
-      VFRenderer: Object
+      scaleName: "major",
+      scales: [
+        { name: "major", title: "Major Scale" },
+        { name: "dorian", title: "Dorian Scale" },
+        { name: "phrygian", title: "Phrygian Scale" },
+        { name: "lydian", title: "Lydian Scale" },
+        { name: "mixolydian", title: "Mixolydian Scale" },
+        { name: "aeolian", title: "Aeolian Scale" },
+        { name: "locrian", title: "Locrian Scale" }
+      ],
+      VF: Object
     };
   },
-  methods: {},
-  created() {
-    // Set scale list.
-    this.scaleList = Scale.names();
-
-    // Set VexFlow;
-    this.VF = Vex.Flow;
-  },
-  mounted() {
-    // Set musical score DOM.
-    this.musicalScoreDom = document.getElementById(this.musicalScoreId);
-
-    // Renderer SVG musical socre.
-    // Set renderer instance.
-    let VF = this.VF;
-    this.renderer = new VF.Renderer(
-      this.musicalScoreDom,
-      this.VF.Renderer.Backends.SVG
-    );
-  },
-  watch: {
-    key: function(newValue) {
-      // Set VexFlow Object.
+  methods: {
+    deleteScale(scaleName) {
+      let staff = document.getElementById(scaleName);
+      while (staff.hasChildNodes()) {
+        staff.removeChild(staff.lastChild);
+      }
+    },
+    drawScale(key, accidental, scaleName, scaleTitle) {
+      // VexFlowのレンダラー生成
+      let scaleDom = document.getElementById(scaleName);
       let VF = this.VF;
+      let VFRenderer = new VF.Renderer(scaleDom, VF.Renderer.Backends.SVG);
 
-      // Size our svg:
-      this.renderer.resize(500, 500);
+      // レンダラーのサイズ設定
+      VFRenderer.resize(500, 500);
 
-      // And get a drawing context:
-      var context = this.renderer.getContext();
+      // レンダラーのコンテキストを取得
+      var context = VFRenderer.getContext();
+      context.clear();
 
-      // context.setFont("Arial", "10px", "").setBackgroundFillStyle("#eed");
-
-      // Create a stave at position 10, 40 of width 400 on the canvas.
+      // 五線譜の作成（<canvas>）
+      // x: 10, y: 40, width: 400
       var stave = new VF.Stave(10, 40, 480);
 
-      // Add a clef and time signature.
+      // ト音記号の追加
       stave.addClef("treble");
 
-      // Connect it to the rendering context!
+      // 五線譜にコンテキストを設定
       stave.setContext(context);
 
-      let scaleNotesDatas = Scale.get(
-        this.key + this.accidental + "4 " + this.scale
-      ).notes;
-      console.log(scaleNotesDatas);
-      let scaleNotes = new Array();
+      // スケールに対するダイアトニックノートを取得
+      let scaleNotes = Scale.get(key + this.accidental + "4 " + scaleName)
+        .notes;
+
+      // ダイアトニックノート格納用配列
+      // ダイアトニック名格納用配列
+      let diatonicNotes = new Array();
+      let diatonicNames = new Array();
+
+      // 臨時記号を検索する正規表現
       var accidentalMarkRegExp = new RegExp(/#|b/);
 
       // スケールのインターバルに合わせてキーのスケールノートを生成
-      for (let [index, note] of scaleNotesDatas.entries()) {
+      for (let [index, note] of scaleNotes.entries()) {
         // 音名を取得
         let noteName = note.slice(0, -1);
 
@@ -124,87 +126,73 @@ export default {
         var accidentalMark = note.match(accidentalMarkRegExp);
 
         // TODO: 臨時記号が2つあった場合は条件分岐を変更
+        // ダイアトニックノートを設定
         if (null !== accidentalMark) {
-          scaleNotes[index] = new VF.StaveNote({
+          diatonicNotes[index] = new VF.StaveNote({
             clef: "treble",
             keys: [noteName.toLowerCase() + "/" + noteOct],
             duration: "w"
           }).addAccidental(0, new VF.Accidental(accidentalMark[0]));
         } else {
-          scaleNotes[index] = new VF.StaveNote({
+          diatonicNotes[index] = new VF.StaveNote({
             clef: "treble",
             keys: [noteName.toLowerCase() + "/" + noteOct],
             duration: "w"
           });
         }
+
+        // ダイアトニック名を設定
+        diatonicNames[index] = new VF.TextNote({
+          text: noteName,
+          duration: "w"
+        })
+          .setStave(stave)
+          .setLine(12)
+          .setJustification(VF.TextNote.Justification.LEFT);
       }
 
-      console.log(scaleNotes);
+      // 7/7で音符用Voiceを作成
+      let noteVoice = new VF.Voice({ num_beats: 7, beat_value: 1 });
+      noteVoice.addTickables(diatonicNotes);
 
-      // Create a voice in 4/4 and add above notes
-      var voice = new VF.Voice({ num_beats: 7, beat_value: 1 });
-      voice.addTickables(scaleNotes);
-
-      // TODO: コードネームを表示したい
-      // https://github.com/0xfe/vexflow/blob/master/src/textnote.js
-      var dynamics = [
-        new VF.TextNote({
-          text: "C",
-          duration: "w"
-        })
-          .setStave(stave)
-          .setLine(12)
-          .setJustification(VF.TextNote.Justification.LEFT),
-        new VF.TextNote({
-          text: "D",
-          duration: "w"
-        })
-          .setStave(stave)
-          .setLine(12)
-          .setJustification(VF.TextNote.Justification.LEFT),
-        new VF.TextNote({ glyph: "p", duration: "w" })
-          .setStave(stave)
-          .setLine(12)
-          .setJustification(VF.TextNote.Justification.LEFT),
-        new VF.TextNote({ glyph: "p", duration: "w" })
-          .setStave(stave)
-          .setLine(12)
-          .setJustification(VF.TextNote.Justification.LEFT),
-        new VF.TextNote({ glyph: "p", duration: "w" })
-          .setStave(stave)
-          .setLine(12)
-          .setJustification(VF.TextNote.Justification.LEFT),
-        new VF.TextNote({ glyph: "p", duration: "w" })
-          .setStave(stave)
-          .setLine(12)
-          .setJustification(VF.TextNote.Justification.LEFT),
-        new VF.TextNote({ glyph: "p", duration: "w" })
-          .setStave(stave)
-          .setLine(12)
-          .setJustification(VF.TextNote.Justification.LEFT)
-      ];
-
-      var voice2 = new VF.Voice({ num_beats: 7, beat_value: 1 });
-      voice2.addTickables(dynamics);
+      // 7/7で音名用Voiceを作成
+      let nameVoice = new VF.Voice({ num_beats: 7, beat_value: 1 });
+      nameVoice.addTickables(diatonicNames);
 
       // Format and justify the notes to 400 pixels.
-      var formatter = new VF.Formatter()
-        .joinVoices([voice, voice2])
-        .format([voice, voice2], 480);
-
-      // var formatter = new VF.Formatter()
-      //   .joinVoices([voice2])
-      //   .format([voice2], 400);
+      let formatter = new VF.Formatter()
+        .joinVoices([noteVoice, nameVoice])
+        .format([noteVoice, nameVoice], 480);
 
       // Clear musical score.
-      context.clear();
+      // context.clear();
 
       // Render stave.
       stave.draw();
 
       // Render voice.
-      voice.draw(context, stave);
-      voice2.draw(context, stave);
+      noteVoice.draw(context, stave);
+      nameVoice.draw(context, stave);
+    }
+  },
+  created() {
+    // Set scale list.
+    console.log(Scale.names());
+
+    // Set VexFlow;
+    this.VF = Vex.Flow;
+  },
+  mounted() {},
+  watch: {
+    key: function(newValue) {
+      // TODO: チャーチモードスケールごとに楽譜生成
+      for (let [index, scale] of Object.entries(this.scales)) {
+        // 既に描画されているスケールを削除
+        this.deleteScale(scale.name);
+
+        // スケールを描画
+        this.drawScale(newValue, this.accidental, scale.name, scale.title);
+      }
     }
   }
 };
@@ -213,32 +201,8 @@ export default {
 <style>
 .container {
   margin: 0 auto;
+  padding-left: 16em;
+  padding-right: 16em;
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.title {
-  font-family: "Quicksand", "Source Sans Pro", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
-}
-
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
-}
-
-.links {
-  padding-top: 15px;
 }
 </style>
