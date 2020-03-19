@@ -15,6 +15,15 @@
       </label>
 
       <label>
+        <span>Accidental</span>
+        <select v-model="accidental" name="Accidental">
+          <option value>(None)</option>
+          <option value="#">#</option>
+          <option value="b">b</option>
+        </select>
+      </label>
+
+      <label>
         <span>Scale</span>
         <select v-model="scale" name="scale">
           <option value="major">(Melodic) Major</option>
@@ -25,7 +34,7 @@
         </select>
       </label>
 
-      <div id="score"></div>
+      <div :id="musicalScoreId"></div>
     </div>
   </div>
 </template>
@@ -39,47 +48,67 @@ export default {
   components: {},
   data() {
     return {
-      VF: Object,
+      musicalScoreId: "musical-score",
+      musicalScoreDom: Object,
       key: "C",
+      accidental: "",
       scale: "major",
       scaleList: Object,
-      scaleOrder: ["c", "d", "e", "f", "g", "a", "b"]
+      scaleOrder: ["c", "d", "e", "f", "g", "a", "b"],
       // scaleNotes: {
       //   type: Array,
       //   default: () => []
       // }
+      VF: Object,
+      VFRenderer: Object
     };
   },
+  methods: {},
   created() {
+    // Set scale list.
     this.scaleList = Scale.names();
+
+    // Set VexFlow;
+    this.VF = Vex.Flow;
   },
   mounted() {
-    this.VF = Vex.Flow;
+    // Set musical score DOM.
+    this.musicalScoreDom = document.getElementById(this.musicalScoreId);
+
+    // Renderer SVG musical socre.
+    // Set renderer instance.
+    let VF = this.VF;
+    this.renderer = new VF.Renderer(
+      this.musicalScoreDom,
+      this.VF.Renderer.Backends.SVG
+    );
   },
   watch: {
     key: function(newValue) {
+      // Set VexFlow Object.
       let VF = this.VF;
 
-      // Create an SVG renderer and attach it to the DIV element named "boo".
-      var div = document.getElementById("score");
-      var renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
-
       // Size our svg:
-      renderer.resize(500, 500);
+      this.renderer.resize(500, 500);
 
       // And get a drawing context:
-      var context = renderer.getContext();
+      var context = this.renderer.getContext();
+
+      // context.setFont("Arial", "10px", "").setBackgroundFillStyle("#eed");
 
       // Create a stave at position 10, 40 of width 400 on the canvas.
-      var stave = new VF.Stave(10, 40, 400);
+      var stave = new VF.Stave(10, 40, 480);
 
       // Add a clef and time signature.
       stave.addClef("treble");
 
-      // Connect it to the rendering context and draw!
-      stave.setContext(context).draw();
+      // Connect it to the rendering context!
+      stave.setContext(context);
 
-      let scaleNotesDatas = Scale.get(this.key + "4 " + this.scale).notes;
+      let scaleNotesDatas = Scale.get(
+        this.key + this.accidental + "4 " + this.scale
+      ).notes;
+      console.log(scaleNotesDatas);
       let scaleNotes = new Array();
       var accidentalMarkRegExp = new RegExp(/#|b/);
 
@@ -93,6 +122,8 @@ export default {
 
         // 臨時記号を取得
         var accidentalMark = note.match(accidentalMarkRegExp);
+
+        // TODO: 臨時記号が2つあった場合は条件分岐を変更
         if (null !== accidentalMark) {
           scaleNotes[index] = new VF.StaveNote({
             clef: "treble",
@@ -108,17 +139,72 @@ export default {
         }
       }
 
+      console.log(scaleNotes);
+
       // Create a voice in 4/4 and add above notes
       var voice = new VF.Voice({ num_beats: 7, beat_value: 1 });
       voice.addTickables(scaleNotes);
 
+      // TODO: コードネームを表示したい
+      // https://github.com/0xfe/vexflow/blob/master/src/textnote.js
+      var dynamics = [
+        new VF.TextNote({
+          text: "C",
+          duration: "w"
+        })
+          .setStave(stave)
+          .setLine(12)
+          .setJustification(VF.TextNote.Justification.LEFT),
+        new VF.TextNote({
+          text: "D",
+          duration: "w"
+        })
+          .setStave(stave)
+          .setLine(12)
+          .setJustification(VF.TextNote.Justification.LEFT),
+        new VF.TextNote({ glyph: "p", duration: "w" })
+          .setStave(stave)
+          .setLine(12)
+          .setJustification(VF.TextNote.Justification.LEFT),
+        new VF.TextNote({ glyph: "p", duration: "w" })
+          .setStave(stave)
+          .setLine(12)
+          .setJustification(VF.TextNote.Justification.LEFT),
+        new VF.TextNote({ glyph: "p", duration: "w" })
+          .setStave(stave)
+          .setLine(12)
+          .setJustification(VF.TextNote.Justification.LEFT),
+        new VF.TextNote({ glyph: "p", duration: "w" })
+          .setStave(stave)
+          .setLine(12)
+          .setJustification(VF.TextNote.Justification.LEFT),
+        new VF.TextNote({ glyph: "p", duration: "w" })
+          .setStave(stave)
+          .setLine(12)
+          .setJustification(VF.TextNote.Justification.LEFT)
+      ];
+
+      var voice2 = new VF.Voice({ num_beats: 7, beat_value: 1 });
+      voice2.addTickables(dynamics);
+
       // Format and justify the notes to 400 pixels.
       var formatter = new VF.Formatter()
-        .joinVoices([voice])
-        .format([voice], 400);
+        .joinVoices([voice, voice2])
+        .format([voice, voice2], 480);
 
-      // Render voice
+      // var formatter = new VF.Formatter()
+      //   .joinVoices([voice2])
+      //   .format([voice2], 400);
+
+      // Clear musical score.
+      context.clear();
+
+      // Render stave.
+      stave.draw();
+
+      // Render voice.
       voice.draw(context, stave);
+      voice2.draw(context, stave);
     }
   }
 };
