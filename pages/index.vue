@@ -36,11 +36,9 @@
 
       <div :id="musicalScoreId"></div>
 
-      <dl id="musical-scores">
-        <template v-for="scale in scales">
-          <dt :key="scale.name">{{ scale.title }}</dt>
-          <dd :key="scale.name" :id="scale.name"></dd>
-        </template>
+      <dl id="musical-scores" v-for="scale in scales" :key="scale.name">
+        <dt>{{ scale.title }}</dt>
+        <dd :id="scale.name"></dd>
       </dl>
     </div>
   </div>
@@ -111,23 +109,23 @@ export default {
       let diatonicNotes = new Array();
       let diatonicNames = new Array();
 
-      // 臨時記号を検索する正規表現
-      var accidentalMarkRegExp = new RegExp(/#|b/);
-
       // スケールのインターバルに合わせてキーのスケールノートを生成
       for (let [index, note] of scaleNotes.entries()) {
+        // 臨時記号が2つ以上あった場合は単純化（例: F## -> G）してデータ取得
+        let simplifyNote = Note.simplify(note);
+        let noteData = Note.get(simplifyNote);
+
         // 音名を取得
-        let noteName = note.slice(0, -1);
+        let noteName = noteData.pc;
 
         // オクターブを取得
-        var noteOct = note.slice(-1);
+        var noteOct = noteData.oct;
 
         // 臨時記号を取得
-        var accidentalMark = note.match(accidentalMarkRegExp);
+        var accidentalMark = noteData.acc;
 
-        // TODO: 臨時記号が2つあった場合は条件分岐を変更
         // ダイアトニックノートを設定
-        if (null !== accidentalMark) {
+        if ("" !== accidentalMark) {
           diatonicNotes[index] = new VF.StaveNote({
             clef: "treble",
             keys: [noteName.toLowerCase() + "/" + noteOct],
@@ -185,7 +183,7 @@ export default {
   mounted() {},
   watch: {
     key: function(newValue) {
-      // TODO: チャーチモードスケールごとに楽譜生成
+      // チャーチモードスケールごとに楽譜生成
       for (let [index, scale] of Object.entries(this.scales)) {
         // 既に描画されているスケールを削除
         this.deleteScale(scale.name);
