@@ -23,20 +23,7 @@
         </select>
       </label>
 
-      <label>
-        <span>Scale</span>
-        <select v-model="scaleName" name="scale">
-          <option value="major">(Melodic) Major</option>
-          <option value="MelodicMajor">Hormonic Major</option>
-          <option value="d">Natural Minor</option>
-          <option value="e">Hormonic Minor</option>
-          <option value="f">Melodic Minor</option>
-        </select>
-      </label>
-
-      <div :id="musicalScoreId"></div>
-
-      <dl id="musical-scores" v-for="scale in scales" :key="scale.name">
+      <dl class="scale-score" v-for="scale in scales" :key="scale.name">
         <dt>{{ scale.title }}</dt>
         <dd :id="scale.name"></dd>
       </dl>
@@ -53,11 +40,8 @@ export default {
   components: {},
   data() {
     return {
-      musicalScoreId: "musical-score",
-      musicalScoreDom: Object,
       key: "C",
       accidental: "",
-      scaleName: "major",
       scales: [
         { name: "major", title: "Major Scale" },
         { name: "dorian", title: "Dorian Scale" },
@@ -71,6 +55,19 @@ export default {
     };
   },
   methods: {
+    /**
+     * チャーチモードスケールを全て描画
+     */
+    drawChurchModeScale(key, accidental) {
+      // チャーチモードスケールごとに楽譜生成
+      for (let [index, scale] of Object.entries(this.scales)) {
+        // 既に描画されているスケールを削除
+        this.deleteScale(scale.name);
+
+        // スケールを描画
+        this.drawScale(key, accidental, scale.name, scale.title);
+      }
+    },
     deleteScale(scaleName) {
       let staff = document.getElementById(scaleName);
       while (staff.hasChildNodes()) {
@@ -84,7 +81,7 @@ export default {
       let VFRenderer = new VF.Renderer(scaleDom, VF.Renderer.Backends.SVG);
 
       // レンダラーのサイズ設定
-      VFRenderer.resize(500, 500);
+      VFRenderer.resize(500, 200);
 
       // レンダラーのコンテキストを取得
       var context = VFRenderer.getContext();
@@ -92,7 +89,7 @@ export default {
 
       // 五線譜の作成（<canvas>）
       // x: 10, y: 40, width: 400
-      var stave = new VF.Stave(10, 40, 480);
+      var stave = new VF.Stave(0, 0, 480);
 
       // ト音記号の追加
       stave.addClef("treble");
@@ -180,27 +177,33 @@ export default {
     // Set VexFlow;
     this.VF = Vex.Flow;
   },
-  mounted() {},
+  mounted() {
+    this.drawChurchModeScale(this.key, this.accidental);
+  },
   watch: {
     key: function(newValue) {
-      // チャーチモードスケールごとに楽譜生成
-      for (let [index, scale] of Object.entries(this.scales)) {
-        // 既に描画されているスケールを削除
-        this.deleteScale(scale.name);
-
-        // スケールを描画
-        this.drawScale(newValue, this.accidental, scale.name, scale.title);
-      }
+      // チャーチモードスケールの描画
+      this.drawChurchModeScale(newValue, this.accidental);
+    },
+    accidental: function(newValue) {
+      // チャーチモードスケールの描画
+      this.drawChurchModeScale(this.key, newValue);
     }
   }
 };
 </script>
 
-<style>
+<style lang="scss">
 .container {
   margin: 0 auto;
   padding-left: 16em;
   padding-right: 16em;
   min-height: 100vh;
+}
+
+.scale-score {
+  dd {
+    margin: 0;
+  }
 }
 </style>
