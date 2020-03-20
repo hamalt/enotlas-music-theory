@@ -45,6 +45,8 @@
     "sanitize.css": "^11.0.0",
     "sass-loader": "^8.0.2",
     "stylelint": "^13.2.1",
+    "stylelint-config-standard": "^20.0.0",
+    "stylelint-scss": "^3.16.0",
     "vexflow": "^1.2.90"
   }
 }

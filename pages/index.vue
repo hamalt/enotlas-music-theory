@@ -1,33 +1,31 @@
 <template>
-  <div class="container">
-    <div>
-      <label>
-        <span>Key</span>
-        <select v-model="key" name="key">
-          <option value="C">C</option>
-          <option value="D">D</option>
-          <option value="E">E</option>
-          <option value="F">F</option>
-          <option value="G">G</option>
-          <option value="A">A</option>
-          <option value="B">B</option>
-        </select>
-      </label>
+  <div class="scale-contents">
+    <label>
+      <span>Key</span>
+      <select v-model="key" name="key">
+        <option value="C">C</option>
+        <option value="D">D</option>
+        <option value="E">E</option>
+        <option value="F">F</option>
+        <option value="G">G</option>
+        <option value="A">A</option>
+        <option value="B">B</option>
+      </select>
+    </label>
 
-      <label>
-        <span>Accidental</span>
-        <select v-model="accidental" name="Accidental">
-          <option value>(None)</option>
-          <option value="#">#</option>
-          <option value="b">b</option>
-        </select>
-      </label>
+    <label>
+      <span>Accidental</span>
+      <select v-model="accidental" name="Accidental">
+        <option value>(None)</option>
+        <option value="#">#</option>
+        <option value="b">b</option>
+      </select>
+    </label>
 
-      <dl class="scale-score" v-for="scale in scales" :key="scale.name">
-        <dt>{{ scale.title }}</dt>
-        <dd :id="scale.name"></dd>
-      </dl>
-    </div>
+    <dl class="scale-score" v-for="scale in scales" :key="scale.name">
+      <dt>{{ scale.title }}</dt>
+      <dd :id="scale.name"></dd>
+    </dl>
   </div>
 </template>
 
@@ -43,7 +41,7 @@ export default {
       key: "C",
       accidental: "",
       scales: [
-        { name: "major", title: "Major Scale" },
+        { name: "major", title: "Major(Ionian) Scale" },
         { name: "dorian", title: "Dorian Scale" },
         { name: "phrygian", title: "Phrygian Scale" },
         { name: "lydian", title: "Lydian Scale" },
@@ -81,7 +79,7 @@ export default {
       let VFRenderer = new VF.Renderer(scaleDom, VF.Renderer.Backends.SVG);
 
       // レンダラーのサイズ設定
-      VFRenderer.resize(500, 200);
+      VFRenderer.resize(500, 120);
 
       // レンダラーのコンテキストを取得
       var context = VFRenderer.getContext();
@@ -89,7 +87,7 @@ export default {
 
       // 五線譜の作成（<canvas>）
       // x: 10, y: 40, width: 400
-      var stave = new VF.Stave(0, 0, 480);
+      var stave = new VF.Stave(0, 0, 500);
 
       // ト音記号の追加
       stave.addClef("treble");
@@ -194,16 +192,13 @@ export default {
 </script>
 
 <style lang="scss">
-.container {
-  margin: 0 auto;
-  padding-left: 16em;
-  padding-right: 16em;
-  min-height: 100vh;
-}
-
 .scale-score {
   dd {
     margin: 0;
+  }
+
+  svg {
+    width: 100%;
   }
 }
 </style>

@@ -1,19 +1,17 @@
 <template>
   <div class="site-wrapper">
+    <header class="site-header">
+      <h1>Scale List</h1>
+    </header>
     <main role="main" class="site-contents">
       <nuxt />
     </main>
-    <sidebar class="site-navigation" />
   </div>
 </template>
 
 <script>
-import Sidebar from "~/components/Sidebar.vue";
-
 export default {
-  components: {
-    Sidebar
-  }
+  components: {}
 };
 </script>
 
@@ -22,21 +20,18 @@ html {
   font-size: 16px;
 }
 
-.site-wrapper {
-  display: flex;
-  justify-content: space-between;
-  max-width: 1280px;
-}
+$gutter: 1.5rem;
 
-$navigation-width: 320px;
+.site-wrapper {
+  max-width: calc(1120px + #{$gutter * 2});
+  padding-left: $gutter;
+  padding-right: $gutter;
+  margin-right: auto;
+  margin-left: auto;
+}
 
 .site-contents {
-  order: 2;
-  width: calc(100% - #{$navigation-width});
-}
-
-.site-navigation {
-  order: 1;
-  width: $navigation-width;
+  display: block;
+  width: 100%;
 }
 </style>
