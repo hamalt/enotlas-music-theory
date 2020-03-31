@@ -53,8 +53,14 @@ export default {
   modules: [
     '@nuxtjs/pwa',
     // Doc: https://github.com/nuxt-community/dotenv-module
-    '@nuxtjs/dotenv'
+    '@nuxtjs/dotenv',
+    'nuxt-webfontloader'
   ],
+  webfontloader: {
+    google: {
+      families: ['Noto+Sans+JP']
+    }
+  },
   /*
    ** Build configuration
    */

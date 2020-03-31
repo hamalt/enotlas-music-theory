@@ -41,6 +41,7 @@
     "lint-staged": "^10.1.0",
     "node-sass": "^4.13.1",
     "npm-check-updates": "^4.1.0",
+    "nuxt-webfontloader": "^1.1.0",
     "prettier": "^2.0.2",
     "sanitize.css": "^11.0.0",
     "sass-loader": "^8.0.2",

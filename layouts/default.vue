@@ -18,6 +18,7 @@ export default {
 <style lang="scss">
 html {
   font-size: 16px;
+  font-family: "Noto Sans JP", sans-serif;
 }
 
 $gutter: 1.5rem;
