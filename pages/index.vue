@@ -1,43 +1,36 @@
 <template>
   <div class="scale-contents">
-    <label>
-      <span>Key</span>
-      <select v-model="key" name="key">
-        <option value="C">C</option>
-        <option value="D">D</option>
-        <option value="E">E</option>
-        <option value="F">F</option>
-        <option value="G">G</option>
-        <option value="A">A</option>
-        <option value="B">B</option>
-      </select>
-    </label>
+    <b-field grouped>
+      <b-field label="Key">
+        <b-field>
+          <b-select v-model="key" placeholder="Select a key">
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="E">E</option>
+            <option value="F">F</option>
+            <option value="G">G</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+          </b-select>
+          <b-radio-button v-model="accidental" native-value>(None)</b-radio-button>
+          <b-radio-button v-model="accidental" native-value="#">♯</b-radio-button>
+          <b-radio-button v-model="accidental" native-value="b">♭</b-radio-button>
+        </b-field>
+      </b-field>
 
-    <label>
-      <span>Accidental</span>
-      <select v-model="accidental" name="accidental">
-        <option value>(None)</option>
-        <option value="#">#</option>
-        <option value="b">b</option>
-      </select>
-    </label>
+      <b-field label="Scale Type">
+        <b-select v-model="scaleType" placeholder="Select a scale type">
+          <option value="major">(Melodic) Major</option>
+          <option value="natural">Natural Minor</option>
+          <option value="harmonic">Harmonic Minor</option>
+          <option value="melodic">Melodic Minor</option>
+        </b-select>
+      </b-field>
 
-    <label>
-      <span>Scale Type</span>
-      <select v-model="scaleType" name="scaleType">
-        <option value="major">(Melodic) Major</option>
-        <option value="natural">Natural Minor</option>
-        <option value="harmonic">Harmonic Minor</option>
-        <option value="melodic">Melodic Minor</option>
-      </select>
-    </label>
-
-    <label>
-      <span>Chord</span>
-      <label for="chord-display">
-        <input type="checkbox" id="chord-display" v-model="chordDisplay" />
-      </label>
-    </label>
+      <b-field label="Chord">
+        <b-switch v-model="chordDisplay">Display</b-switch>
+      </b-field>
+    </b-field>
 
     <dl class="scale-score" v-for="scale in scales" :key="scale.name">
       <dt>{{key + accidental}} {{ scale.title }}</dt>
@@ -69,7 +62,8 @@ export default {
         { name: "aeolian", title: "Aeolian Scale" },
         { name: "locrian", title: "Locrian Scale" }
       ],
-      VF: Object
+      VF: Object,
+      rendererWidth: 620
     };
   },
   methods: {
@@ -99,7 +93,7 @@ export default {
       let VFRenderer = new VF.Renderer(scaleDom, VF.Renderer.Backends.SVG);
 
       // レンダラーのサイズ設定
-      VFRenderer.resize(500, 150);
+      VFRenderer.resize(this.rendererWidth, 150);
 
       // レンダラーのコンテキストを取得
       var context = VFRenderer.getContext();
@@ -107,7 +101,7 @@ export default {
 
       // 五線譜の作成（<canvas>）
       // x: 10, y: 40, width: 400
-      var stave = new VF.Stave(0, 0, 500);
+      var stave = new VF.Stave(0, 0, this.rendererWidth);
 
       // ト音記号の追加
       stave.addClef("treble");
@@ -265,7 +259,7 @@ export default {
       // Format and justify the notes to 400 pixels.
       let formatter = new VF.Formatter()
         .joinVoices([noteVoice, nameVoice])
-        .format([noteVoice, nameVoice], 480);
+        .format([noteVoice, nameVoice], (this.rendererWidth - 20));
 
       // Clear musical score.
       // context.clear();

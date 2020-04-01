@@ -1,18 +1,35 @@
 <template>
   <div class="site-wrapper">
-    <header class="site-header">
-      <h1>Scale List</h1>
-    </header>
-    <main role="main" class="site-contents">
-      <nuxt />
-    </main>
+    <site-header />
+
+    <div class="columns is-variable bd-klmn-columns is-0">
+      <div class="column is-3">
+        <div class="section">
+          <site-sidebar />
+        </div>
+      </div>
+      <div class="column is-9">
+        <main role="main" class="section">
+          <nuxt />
+        </main>
+      </div>
+    </div>
+
+    <site-footer />
   </div>
 </template>
 
 <script>
+import SiteHeader from "~/components/layout/SiteHeader.vue";
+import SiteFooter from "~/components/layout/SiteFooter.vue";
+import SiteSidebar from "~/components/layout/SiteSidebar.vue";
 export default {
-  components: {}
-};
+  components: {
+    SiteHeader,
+    SiteFooter,
+    SiteSidebar
+  }
+}
 </script>
 
 <style lang="scss">
@@ -21,15 +38,15 @@ html {
   font-family: "Noto Sans JP", sans-serif;
 }
 
-$gutter: 1.5rem;
+// $gutter: 1.5rem;
 
-.site-wrapper {
-  max-width: calc(1120px + #{$gutter * 2});
-  padding-left: $gutter;
-  padding-right: $gutter;
-  margin-right: auto;
-  margin-left: auto;
-}
+// .site-wrapper {
+//   max-width: calc(1120px + #{$gutter * 2});
+//   padding-left: $gutter;
+//   padding-right: $gutter;
+//   margin-right: auto;
+//   margin-left: auto;
+// }
 
 .site-contents {
   display: block;
