@@ -23,6 +23,16 @@
     </label>
 
     <label>
+      <span>Scale Type</span>
+      <select v-model="scaleType" name="scaleType">
+        <option value="major">(Melodic) Major</option>
+        <option value="natural">Natural Minor</option>
+        <option value="harmonic">Harmonic Minor</option>
+        <option value="melodic">Melodic Minor</option>
+      </select>
+    </label>
+
+    <label>
       <span>Chord</span>
       <label for="chord-display">
         <input type="checkbox" id="chord-display" v-model="chordDisplay" />
@@ -47,6 +57,7 @@ export default {
     return {
       key: "C",
       accidental: "",
+      scaleType: "major",
       chordDisplay: true,
       allKeyDatas: [],
       scales: [
@@ -115,7 +126,6 @@ export default {
       // スケールのインターバルに合わせてキーのスケールノートを生成
       for (let [index, note] of scaleData.notes.entries()) {
         // 臨時記号が2つ以上あった場合は単純化（例: F## -> G）してデータ取得
-        // C4
         let simplifyNote = Note.simplify(note);
         let noteData = Note.get(simplifyNote);
 
@@ -125,7 +135,10 @@ export default {
 
         // ダイアトニックノートを設定
         let tones = [];
+
+        // コード表示にチェックが入っているならコードトーン
         if (true === this.chordDisplay) {
+          console.log(scaleData.notes);
           // スケール音の数
           let noteCount = scaleData.notes.length;
 
@@ -194,6 +207,12 @@ export default {
 
           // ダイアトニックな音名設定
           diatonicText = Chord.detect(diatonicChordTones);
+
+          //const isInCTriad = isNoteIncludedIn(["C", "E", "G"]);
+          // isInCTriad("C4"); // => true
+          // isInCTriad("C#4"); // => false
+          // TODO: この機能で「diatonicChordTones」がメジャースケールの各音に含まれているか調べる
+          //
         } else {
         // 音名を取得
         let noteName = noteData.pc;
