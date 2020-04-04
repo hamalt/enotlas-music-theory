@@ -21,9 +21,9 @@
       <b-field label="Scale Type">
         <b-select v-model="scaleType" placeholder="Select a scale type">
           <option value="major">(Melodic) Major</option>
-          <option value="natural">Natural Minor</option>
-          <option value="harmonic">Harmonic Minor</option>
-          <option value="melodic">Melodic Minor</option>
+          <option value="minor">Natural Minor</option>
+          <option value="harmonic minor">Harmonic Minor</option>
+          <option value="melodic minor">Melodic Minor</option>
         </b-select>
       </b-field>
 
@@ -32,15 +32,14 @@
       </b-field>
     </b-field>
 
-    <dl class="scale-score" v-for="scale in scales" :key="scale.name">
+    <dl class="scales" v-for="scale in scales" :key="scale.name">
       <dt>{{key + accidental}} {{ scale.title }}</dt>
-      <dd :id="scale.name"></dd>
+      <dd :id="scale.id" class="scales__score"></dd>
     </dl>
   </div>
 </template>
 
 <script>
-// require("prismjs/themes/prism.css");
 import Vex from "vexflow";
 import { Note, Interval, Scale, Key, Chord } from "@tonaljs/tonal";
 
@@ -50,23 +49,43 @@ export default {
     return {
       key: "C",
       accidental: "",
-      scaleType: "major",
+      scaleType: "harmonic minor",
       chordDisplay: true,
-      allKeyDatas: [],
-      scales: [
-        { name: "major", title: "Major(Ionian) Scale" },
-        { name: "dorian", title: "Dorian Scale" },
-        { name: "phrygian", title: "Phrygian Scale" },
-        { name: "lydian", title: "Lydian Scale" },
-        { name: "mixolydian", title: "Mixolydian Scale" },
-        { name: "aeolian", title: "Aeolian Scale" },
-        { name: "locrian", title: "Locrian Scale" }
-      ],
+      scoreIdPrefix: "score-",
+      scales: [],
       VF: Object,
       rendererWidth: 620
     };
   },
   methods: {
+    /**
+     * スケール情報を設定
+     *
+     * メジャースケールの場合
+     * this.scales = [
+     * { id: "score-0", name: "major", title: "Major(Ionian) Scale" },
+     * { id: "score-1", name: "dorian", title: "Dorian Scale" },
+     * { id: "score-2", name: "phrygian", title: "Phrygian Scale" },
+     * { id: "score-3",  name: "lydian", title: "Lydian Scale" },
+     * { id: "score-4", name: "mixolydian", title: "Mixolydian Scale" },
+     * { id: "score-5", name: "aeolian", title: "Aeolian Scale" },
+     * { id: "score-6", name: "locrian", title: "Locrian Scale" }
+     * ]
+     */
+    setScales(scaleType) {
+      // TODO: setScalesを実行したあとだけ楽譜描画がおかしい
+      console.log("Start: setScale");
+      let modeNames = Scale.modeNames(this.key + " " + scaleType);
+           console.log(modeNames);
+      for (let [index, modeName] of modeNames.entries()) {
+        let scaleProperties = Scale.get(modeName[1]);
+        let aliasName = scaleProperties.aliases.length > 0 ? "(" + scaleProperties.aliases[0] + ")" : "";
+        let titleText = scaleProperties.name + aliasName + " scale";
+        this.scales[index] = {id: this.scoreIdPrefix + index, name: modeName[1], title: titleText};
+      }
+      console.log(this.scales);
+      console.log("End: setScale");
+    },
     /**
      * チャーチモードスケールを全て描画
      */
@@ -74,22 +93,30 @@ export default {
       // チャーチモードスケールごとに楽譜生成
       for (let [index, scale] of Object.entries(this.scales)) {
         // 既に描画されているスケールを削除
-        this.deleteScale(scale.name);
+        this.deleteScale(index);
 
         // スケールを描画
-        this.drawScale(key, accidental, scale.name, scale.title);
+        console.log(key + accidental + scale.name);
+        this.drawScale(index, key, accidental, scale.name);
       }
     },
-    deleteScale(scaleName) {
-      let staff = document.getElementById(scaleName);
+    /**
+     * 描画されている楽譜を削除
+     */
+    deleteScale(scoreNum) {
+      let staff = document.getElementById(this.scoreIdPrefix + scoreNum);
       while (staff.hasChildNodes()) {
         staff.removeChild(staff.lastChild);
       }
     },
-    drawScale(key, accidental, scaleName, scaleTitle) {
+    /**
+     * スケールの楽譜描画
+     */
+    drawScale(scoreNum, key, accidental, scaleName) {
       // VexFlowのレンダラー生成
-      let scaleDom = document.getElementById(scaleName);
-      let VF = this.VF;
+      let scaleDom = document.getElementById(this.scoreIdPrefix + scoreNum);
+
+      let VF = Vex.Flow;
       let VFRenderer = new VF.Renderer(scaleDom, VF.Renderer.Backends.SVG);
 
       // レンダラーのサイズ設定
@@ -110,7 +137,8 @@ export default {
       stave.setContext(context);
 
       // スケールのデータ（ダイアトニックノートなど）を取得
-      let scaleData = Scale.get(key + this.accidental + "4 " + scaleName);
+      let scaleData = Scale.get(key + accidental + "4 " + scaleName);
+      console.log(scaleData);
 
       // ダイアトニックノート格納用配列
       // ダイアトニック名格納用配列
@@ -123,6 +151,8 @@ export default {
         let simplifyNote = Note.simplify(note);
         let noteData = Note.get(simplifyNote);
 
+        console.log(noteData);
+
         let accidentalMark = [];
 
         let diatonicText = "";
@@ -132,7 +162,6 @@ export default {
 
         // コード表示にチェックが入っているならコードトーン
         if (true === this.chordDisplay) {
-          console.log(scaleData.notes);
           // スケール音の数
           let noteCount = scaleData.notes.length;
 
@@ -201,12 +230,13 @@ export default {
 
           // ダイアトニックな音名設定
           diatonicText = Chord.detect(diatonicChordTones);
+          console.log(diatonicText);
 
           //const isInCTriad = isNoteIncludedIn(["C", "E", "G"]);
           // isInCTriad("C4"); // => true
           // isInCTriad("C#4"); // => false
           // TODO: この機能で「diatonicChordTones」がメジャースケールの各音に含まれているか調べる
-          //
+
         } else {
         // 音名を取得
         let noteName = noteData.pc;
@@ -276,60 +306,25 @@ export default {
     // Set VexFlow;
     this.VF = Vex.Flow;
 
-    // TODO: keyパッケージを使い、12音の各情報を予め変数にセット
-    let keyNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-
-    for (let [index, keyName] of keyNames.entries()) {
-        // console.log(index);
-        // console.log(keyName);
-        // TODO: 参照
-        // https://github.com/tonaljs/tonal/tree/master/packages/key
-        if ( true ) {
-            this.allKeyDatas[index] = Key.majorKey(keyName);
-        } else {
-            // マイナーキーの情報取得
-            this.allKeyDatas[index] = Key.minorKey(keyName);
-        }
-
-        // console.log(this.allKeyDatas[index]);
-    }
-
-    // console.log(this.allKeyDatas);
-
-    // TODO: 各モードの７音のintervalを予め作成
-    // array = [];
-    // Cドリアン = B♭メジャーの第二音から並べたもの
-    // B♭Majorスケールから2M（長2度）上げた音（transpose）から並べたもの
-    // scale-typeから作成する
-    // https://github.com/tonaljs/tonal/tree/master/packages/scale-type
-    // 以下みたいな感じで取れる
-    // ScaleType.get("Dorian"); -> {intervals: ["1P", "2M", "3M", "4P", "5P", "6M", "7M"],}
-    // I -> 1,3,5
-
-    // TODO: チャーチモードスケールごとにインターバルを取得
-    for (let [index, scale] of Object.entries(this.scales)) {
-      var scaleDictionary = Scale.get(scale.name);
-    }
-
-    // TODO: インターヴァルを元に、コードを作成
-    // Note.transpose("d3", "3M"); // => "F#3"
-    //Note.transpose("D", "3M"); // => "F#"
-    // 参考: transpose: https://github.com/tonaljs/tonal/tree/master/packages/note
+    // スケールの初期設定
+    console.log(this.scaleType);
+    this.setScales(this.scaleType);
   },
   mounted() {
     this.drawChurchModeScale(this.key, this.accidental);
   },
   watch: {
     key: function(newValue) {
-      // チャーチモードスケールの描画
       this.drawChurchModeScale(newValue, this.accidental);
     },
     accidental: function(newValue) {
-      // チャーチモードスケールの描画
       this.drawChurchModeScale(this.key, newValue);
     },
     chordDisplay: function(newValue) {
-      // チャーチモードスケールの描画
+      this.drawChurchModeScale(this.key, this.accidental);
+    },
+    scaleType: function(newValue) {
+      this.setScales(newValue);
       this.drawChurchModeScale(this.key, this.accidental);
     }
   }
@@ -341,8 +336,8 @@ export default {
   max-width: 640px;
 }
 
-.scale-score {
-  dd {
+.scales {
+  &__score {
     margin: 0;
   }
 
