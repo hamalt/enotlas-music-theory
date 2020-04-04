@@ -51,8 +51,10 @@ export default {
       accidental: "",
       scaleType: "harmonic minor",
       chordDisplay: true,
+      scaleTypes: ["major", "minor", "harmonic minor", "melodic minor"],
       scoreIdPrefix: "score-",
       scales: [],
+      scaleDatas: {},
       VF: Object,
       rendererWidth: 620
     };
@@ -73,14 +75,29 @@ export default {
      * ]
      */
     setScaleData() {
+    //TODO: 各スケールの連想配列を予めつくって、それらを描画する。IDもスケール名を使う。
+    // 予め描画して、それを表示/非表示させる（再描画がうまくいかないので）
       console.log("START: setScaleData");
-      let modeNames = Scale.modeNames(this.key + " " + scaleType);
-      for (let [index, modeName] of modeNames.entries()) {
-        let scaleProperties = Scale.get(modeName[1]);
-        let aliasName = scaleProperties.aliases.length > 0 ? "(" + scaleProperties.aliases[0] + ")" : "";
-        let titleText = scaleProperties.name + aliasName + " scale";
-        this.scales[index] = {id: this.scoreIdPrefix + index, name: modeName[1], title: titleText};
+      // 各スケールタイプごとのモードスケール情報を設定
+      for(var[idx, scaleType] of this.scaleTypes.entries()){
+          this.scaleDatas[scaleType] = {};
+          console.log(scaleType);
+          console.log(Scale.modeNames(scaleType));
+          var modeNames = Scale.modeNames(scaleType);
+        for (var [index, modeName] of modeNames.entries()) {
+            let scaleProperties = Scale.get(modeName[1]);
+            let aliasName = scaleProperties.aliases.length > 0 ? "(" + scaleProperties.aliases[0] + ")" : "";
+            let titleText = scaleProperties.name + aliasName + " scale";
+            this.scales[index] = {id: this.scoreIdPrefix + index, name: modeName[1], title: titleText};
+        }
       }
+    //   let modeNames = Scale.modeNames(this.key + " " + scaleType);
+    //   for (let [index, modeName] of modeNames.entries()) {
+    //     let scaleProperties = Scale.get(modeName[1]);
+    //     let aliasName = scaleProperties.aliases.length > 0 ? "(" + scaleProperties.aliases[0] + ")" : "";
+    //     let titleText = scaleProperties.name + aliasName + " scale";
+    //     this.scales[index] = {id: this.scoreIdPrefix + index, name: modeName[1], title: titleText};
+    //   }
       console.log("END: setScaleData");
     },
     /**
