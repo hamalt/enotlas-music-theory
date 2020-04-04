@@ -32,9 +32,9 @@
       </b-field>
     </b-field>
 
-    <dl class="scales" v-for="scale in scales" :key="scale.name">
+    <dl class="scales" v-for="(scale, index) in scales" :key="scale.name">
       <dt>{{key + accidental}} {{ scale.title }}</dt>
-      <dd :id="scale.id" class="scales__score"></dd>
+      <dd :id="'score-' + index" class="scales__score"></dd>
     </dl>
   </div>
 </template>
@@ -76,14 +76,12 @@ export default {
       // TODO: setScalesを実行したあとだけ楽譜描画がおかしい
       console.log("Start: setScale");
       let modeNames = Scale.modeNames(this.key + " " + scaleType);
-           console.log(modeNames);
       for (let [index, modeName] of modeNames.entries()) {
         let scaleProperties = Scale.get(modeName[1]);
         let aliasName = scaleProperties.aliases.length > 0 ? "(" + scaleProperties.aliases[0] + ")" : "";
         let titleText = scaleProperties.name + aliasName + " scale";
         this.scales[index] = {id: this.scoreIdPrefix + index, name: modeName[1], title: titleText};
       }
-      console.log(this.scales);
       console.log("End: setScale");
     },
     /**
@@ -96,7 +94,18 @@ export default {
         this.deleteScale(index);
 
         // スケールを描画
-        console.log(key + accidental + scale.name);
+        // console.log(key);
+        // this.drawScale(index, key, accidental, scale.name);
+      }
+
+      this.setScales(this.scaleType);
+            // チャーチモードスケールごとに楽譜生成
+      for (let [index, scale] of Object.entries(this.scales)) {
+        // 既に描画されているスケールを削除
+        // this.deleteScale(index);
+
+        // スケールを描画
+        console.log(key);
         this.drawScale(index, key, accidental, scale.name);
       }
     },
@@ -104,6 +113,7 @@ export default {
      * 描画されている楽譜を削除
      */
     deleteScale(scoreNum) {
+      console.log("DELETE");
       let staff = document.getElementById(this.scoreIdPrefix + scoreNum);
       while (staff.hasChildNodes()) {
         staff.removeChild(staff.lastChild);
@@ -118,13 +128,15 @@ export default {
 
       let VF = Vex.Flow;
       let VFRenderer = new VF.Renderer(scaleDom, VF.Renderer.Backends.SVG);
+      console.log(VFRenderer);
 
       // レンダラーのサイズ設定
       VFRenderer.resize(this.rendererWidth, 150);
 
       // レンダラーのコンテキストを取得
       var context = VFRenderer.getContext();
-      context.clear();
+      console.log(context);
+      // context.clear();
 
       // 五線譜の作成（<canvas>）
       // x: 10, y: 40, width: 400
@@ -135,9 +147,14 @@ export default {
 
       // 五線譜にコンテキストを設定
       stave.setContext(context);
+      console.log(stave);
+
 
       // スケールのデータ（ダイアトニックノートなど）を取得
       let scaleData = Scale.get(key + accidental + "4 " + scaleName);
+      console.log(key);
+      console.log(accidental);
+      console.log(scaleName);
       console.log(scaleData);
 
       // ダイアトニックノート格納用配列
@@ -147,6 +164,7 @@ export default {
 
       // スケールのインターバルに合わせてキーのスケールノートを生成
       for (let [index, note] of scaleData.notes.entries()) {
+        console.log("START: FOR");
         // 臨時記号が2つ以上あった場合は単純化（例: F## -> G）してデータ取得
         let simplifyNote = Note.simplify(note);
         let noteData = Note.get(simplifyNote);
@@ -162,6 +180,7 @@ export default {
 
         // コード表示にチェックが入っているならコードトーン
         if (true === this.chordDisplay) {
+          console.log("START: IF TRUE");
           // スケール音の数
           let noteCount = scaleData.notes.length;
 
@@ -238,6 +257,7 @@ export default {
           // TODO: この機能で「diatonicChordTones」がメジャースケールの各音に含まれているか調べる
 
         } else {
+          console.log("START: IF ELSE");
         // 音名を取得
         let noteName = noteData.pc;
 
@@ -260,6 +280,7 @@ export default {
           keys: tones,
           duration: "w"
         });
+        console.log(diatonicNotes);
 
         // 臨時記号が存在するなら設定
         for(let i = 0; i < accidentalMark.length; i++) {
@@ -281,16 +302,19 @@ export default {
       // 7/7で音符用Voiceを作成
       let noteVoice = new VF.Voice({ num_beats: 7, beat_value: 1 });
       noteVoice.addTickables(diatonicNotes);
+      console.log(diatonicNotes);
 
       // 7/7で音名用Voiceを作成
       let nameVoice = new VF.Voice({ num_beats: 7, beat_value: 1 });
       nameVoice.addTickables(diatonicNames);
 
       // Format and justify the notes to 400 pixels.
+      console.log("START: Formatter");
+      console.log(noteVoice);
       let formatter = new VF.Formatter()
         .joinVoices([noteVoice, nameVoice])
         .format([noteVoice, nameVoice], (this.rendererWidth - 20));
-
+      console.log("END: Formatter");
       // Clear musical score.
       // context.clear();
 
@@ -324,7 +348,11 @@ export default {
       this.drawChurchModeScale(this.key, this.accidental);
     },
     scaleType: function(newValue) {
-      this.setScales(newValue);
+      // this.setScales(newValue);
+      // let thisObj = this;
+      // setTimeout(function(){
+      //   thisObj.drawChurchModeScale(thisObj.key, thisObj.accidental);
+      // }, 1000);
       this.drawChurchModeScale(this.key, this.accidental);
     }
   }
