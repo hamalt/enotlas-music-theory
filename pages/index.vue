@@ -72,6 +72,31 @@ export default {
      * { id: "score-6", name: "locrian", title: "Locrian Scale" }
      * ]
      */
+    setScaleData() {
+      console.log("START: setScaleData");
+      let modeNames = Scale.modeNames(this.key + " " + scaleType);
+      for (let [index, modeName] of modeNames.entries()) {
+        let scaleProperties = Scale.get(modeName[1]);
+        let aliasName = scaleProperties.aliases.length > 0 ? "(" + scaleProperties.aliases[0] + ")" : "";
+        let titleText = scaleProperties.name + aliasName + " scale";
+        this.scales[index] = {id: this.scoreIdPrefix + index, name: modeName[1], title: titleText};
+      }
+      console.log("END: setScaleData");
+    },
+    /**
+     * スケール情報を設定
+     *
+     * メジャースケールの場合
+     * this.scales = [
+     * { id: "score-0", name: "major", title: "Major(Ionian) Scale" },
+     * { id: "score-1", name: "dorian", title: "Dorian Scale" },
+     * { id: "score-2", name: "phrygian", title: "Phrygian Scale" },
+     * { id: "score-3",  name: "lydian", title: "Lydian Scale" },
+     * { id: "score-4", name: "mixolydian", title: "Mixolydian Scale" },
+     * { id: "score-5", name: "aeolian", title: "Aeolian Scale" },
+     * { id: "score-6", name: "locrian", title: "Locrian Scale" }
+     * ]
+     */
     setScales(scaleType) {
       // TODO: setScalesを実行したあとだけ楽譜描画がおかしい
       console.log("Start: setScale");
@@ -333,6 +358,8 @@ export default {
     // スケールの初期設定
     console.log(this.scaleType);
     this.setScales(this.scaleType);
+
+    this.setScaleData();
   },
   mounted() {
     this.drawChurchModeScale(this.key, this.accidental);
