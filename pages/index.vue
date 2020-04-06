@@ -32,10 +32,19 @@
       </b-field>
     </b-field>
 
-    <dl class="scales" v-for="(scale, index) in scales" :key="scale.name">
-      <dt>{{key + accidental}} {{ scale.title }}</dt>
-      <dd :id="'score-' + index" class="scales__score"></dd>
-    </dl>
+    <div class="scale-scores">
+      <b-tabs>
+        <template v-for="(scaleTypeData, scaleName) in scaleTypeDatas">
+          <b-tab-item :label="scaleName" :key="scaleName" :id="getHyphenFillName(scaleName)">
+            <dl class="scales" v-for="scaleData in scaleTypeData" :key="scaleData.name">
+              <dt>{{key + accidental}} {{ scaleData.title }}</dt>
+              <dd :id="scaleData.id" class="scales__score"></dd>
+            </dl>
+          </b-tab-item>
+        </template>
+      </b-tabs>
+    </div>
+    <!-- .scale-scores -->
   </div>
 </template>
 
@@ -54,42 +63,44 @@ export default {
       scaleTypes: ["major", "minor", "harmonic minor", "melodic minor"],
       scoreIdPrefix: "score-",
       scales: [],
-      scaleDatas: {},
+      scaleTypeDatas: {},
       VF: Object,
       rendererWidth: 620
     };
   },
   methods: {
     /**
+     * 半角スペースをハイフンに変換して取得
+     */
+    getHyphenFillName(str) {
+      return str.replace(" ", "-");
+    },
+    /**
+     * 楽譜描画用の要素IDを取得
+     */
+    getModeId(modeName, aliases, scaleType) {
+      var prefix = scaleType.replace(" ", "-");
+      var name = modeName.replace(" ", "-");
+      return (prefix + "-" + name);
+    },
+    /**
      * スケール情報を設定
-     *
-     * メジャースケールの場合
-     * this.scales = [
-     * { id: "score-0", name: "major", title: "Major(Ionian) Scale" },
-     * { id: "score-1", name: "dorian", title: "Dorian Scale" },
-     * { id: "score-2", name: "phrygian", title: "Phrygian Scale" },
-     * { id: "score-3",  name: "lydian", title: "Lydian Scale" },
-     * { id: "score-4", name: "mixolydian", title: "Mixolydian Scale" },
-     * { id: "score-5", name: "aeolian", title: "Aeolian Scale" },
-     * { id: "score-6", name: "locrian", title: "Locrian Scale" }
-     * ]
      */
     setScaleData() {
     //TODO: 各スケールの連想配列を予めつくって、それらを描画する。IDもスケール名を使う。
     // 予め描画して、それを表示/非表示させる（再描画がうまくいかないので）
-      console.log("START: setScaleData");
       // 各スケールタイプごとのモードスケール情報を設定
-      for(var[idx, scaleType] of this.scaleTypes.entries()){
-          this.scaleDatas[scaleType] = {};
+      for (var[idx, scaleType] of this.scaleTypes.entries()) {
+          this.scaleTypeDatas[scaleType] = {};
           var modeNames = Scale.modeNames(scaleType);
         for (var [index, modeName] of modeNames.entries()) {
-            let scaleProperties = Scale.get(modeName[1]);
-            let aliasName = scaleProperties.aliases.length > 0 ? "(" + scaleProperties.aliases[0] + ")" : "";
-            let titleText = scaleProperties.name + aliasName + " scale";
-            this.scaleDatas[scaleType][index] = {id: this.scoreIdPrefix + index, name: modeName[1], title: titleText};
+            var scaleProperties = Scale.get(modeName[1]);
+            var aliasName = scaleProperties.aliases.length > 0 ? "(" + scaleProperties.aliases[0] + ")" : "";
+            var titleText = scaleProperties.name + aliasName + " scale";
+            var scaleId = this.getModeId(modeName[1], scaleProperties.aliases, scaleType);
+            this.scaleTypeDatas[scaleType][index] = {id: scaleId, name: modeName[1], title: titleText};
         }
       }
-      console.log("END: setScaleData");
     },
     /**
      * スケール情報を設定
@@ -155,10 +166,10 @@ export default {
      */
     deleteScale(scoreNum) {
       console.log("DELETE");
-      let staff = document.getElementById(this.scoreIdPrefix + scoreNum);
-      while (staff.hasChildNodes()) {
-        staff.removeChild(staff.lastChild);
-      }
+      // let staff = document.getElementById(this.scoreIdPrefix + scoreNum);
+      // while (staff.hasChildNodes()) {
+      //   staff.removeChild(staff.lastChild);
+      // }
     },
     /**
      * スケールの楽譜描画
@@ -378,7 +389,7 @@ export default {
     this.setScaleData();
   },
   mounted() {
-    this.drawChurchModeScale(this.key, this.accidental);
+    // this.drawChurchModeScale(this.key, this.accidental);
   },
   watch: {
     key: function(newValue) {
@@ -396,7 +407,7 @@ export default {
       // setTimeout(function(){
       //   thisObj.drawChurchModeScale(thisObj.key, thisObj.accidental);
       // }, 1000);
-      this.drawChurchModeScale(this.key, this.accidental);
+      // this.drawChurchModeScale(this.key, this.accidental);
     }
   }
 };
@@ -415,5 +426,15 @@ export default {
   svg {
     width: 100%;
   }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
