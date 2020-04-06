@@ -33,7 +33,7 @@ export default {
   /*
    ** Global CSS
    */
-  css: ['sanitize.css'],
+  // css: ['sanitize.css'],
   /*
    ** Plugins to load before mounting the App
    */

@@ -1,51 +1,57 @@
 <template>
-  <div class="scale-contents">
-    <b-field grouped>
-      <b-field label="Key">
-        <b-field>
-          <b-select v-model="key" placeholder="Select a key">
-            <option value="C">C</option>
-            <option value="D">D</option>
-            <option value="E">E</option>
-            <option value="F">F</option>
-            <option value="G">G</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-          </b-select>
-          <b-radio-button v-model="accidental" native-value>(None)</b-radio-button>
-          <b-radio-button v-model="accidental" native-value="#">♯</b-radio-button>
-          <b-radio-button v-model="accidental" native-value="b">♭</b-radio-button>
+  <div class="site-contents">
+    <section class="hero">
+      <div class="hero-body">
+        <h1 class="title">Modal Scales &amp; Chords</h1>
+        <h2 class="subtitle">Modal scales &amp; chords list.</h2>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="modal-scales-chords">
+        <b-field grouped>
+          <b-field label="Key">
+            <b-field>
+              <b-select v-model="key" placeholder="Select a key">
+                <option value="C">C</option>
+                <option value="D">D</option>
+                <option value="E">E</option>
+                <option value="F">F</option>
+                <option value="G">G</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+              </b-select>
+              <b-radio-button v-model="accidental" native-value>(None)</b-radio-button>
+              <b-radio-button v-model="accidental" native-value="#">♯</b-radio-button>
+              <b-radio-button v-model="accidental" native-value="b">♭</b-radio-button>
+            </b-field>
+          </b-field>
+
+          <b-field label="Chord">
+            <b-switch v-model="chordDisplay">Display</b-switch>
+          </b-field>
         </b-field>
-      </b-field>
 
-      <b-field label="Scale Type">
-        <b-select v-model="scaleType" placeholder="Select a scale type">
-          <option value="major">(Melodic) Major</option>
-          <option value="minor">Natural Minor</option>
-          <option value="harmonic minor">Harmonic Minor</option>
-          <option value="melodic minor">Melodic Minor</option>
-        </b-select>
-      </b-field>
+        <hr />
 
-      <b-field label="Chord">
-        <b-switch v-model="chordDisplay">Display</b-switch>
-      </b-field>
-    </b-field>
-
-    <div class="scale-scores">
-      <b-tabs>
-        <template v-for="(scaleTypeData, scaleName) in scaleTypeDatas">
-          <b-tab-item :label="scaleName" :key="scaleName" :id="getHyphenFillName(scaleName)">
-            <dl class="scales" v-for="scaleData in scaleTypeData" :key="scaleData.name">
-              <dt>{{key + accidental}} {{ scaleData.title }}</dt>
-              <dd :id="scaleData.id" class="scales__score"></dd>
-            </dl>
-          </b-tab-item>
-        </template>
-      </b-tabs>
-    </div>
-    <!-- .scale-scores -->
+        <div class="scale-scores">
+          <b-tabs>
+            <template v-for="(scaleTypeData, scaleName) in scaleTypeDatas">
+              <b-tab-item :label="scaleName" :key="scaleName" :id="getHyphenFillName(scaleName)">
+                <dl class="scales" v-for="scaleData in scaleTypeData" :key="scaleData.name">
+                  <dt>{{key + accidental}} {{ scaleData.title }}</dt>
+                  <dd :id="scaleData.id" class="scales__score"></dd>
+                </dl>
+              </b-tab-item>
+            </template>
+          </b-tabs>
+        </div>
+        <!-- .scale-scores -->
+      </div>
+      <!-- .modal-scales-chords -->
+    </section>
   </div>
+  <!-- .scale-contents -->
 </template>
 
 <script>
@@ -58,7 +64,6 @@ export default {
     return {
       key: "C",
       accidental: "",
-      scaleType: "harmonic minor",
       chordDisplay: true,
       scaleTypes: ["major", "minor", "harmonic minor", "melodic minor"],
       scoreIdPrefix: "score-",
@@ -95,7 +100,7 @@ export default {
           var modeNames = Scale.modeNames(scaleType);
         for (var [index, modeName] of modeNames.entries()) {
             var scaleProperties = Scale.get(modeName[1]);
-            var aliasName = scaleProperties.aliases.length > 0 ? "(" + scaleProperties.aliases[0] + ")" : "";
+            var aliasName = scaleProperties.aliases.length > 0 ? " (" + scaleProperties.aliases[0] + ")" : "";
             var titleText = scaleProperties.name + aliasName + " scale";
             var scaleId = this.getModeId(modeName[1], scaleProperties.aliases, scaleType);
             this.scaleTypeDatas[scaleType][index] = {id: scaleId, name: modeName[1], title: titleText};
@@ -103,83 +108,51 @@ export default {
       }
     },
     /**
-     * スケール情報を設定
-     *
-     * メジャースケールの場合
-     * this.scales = [
-     * { id: "score-0", name: "major", title: "Major(Ionian) Scale" },
-     * { id: "score-1", name: "dorian", title: "Dorian Scale" },
-     * { id: "score-2", name: "phrygian", title: "Phrygian Scale" },
-     * { id: "score-3",  name: "lydian", title: "Lydian Scale" },
-     * { id: "score-4", name: "mixolydian", title: "Mixolydian Scale" },
-     * { id: "score-5", name: "aeolian", title: "Aeolian Scale" },
-     * { id: "score-6", name: "locrian", title: "Locrian Scale" }
-     * ]
-     */
-    setScales(scaleType) {
-      // TODO: setScalesを実行したあとだけ楽譜描画がおかしい
-      console.log("Start: setScale");
-      let modeNames = Scale.modeNames(this.key + " " + scaleType);
-      for (let [index, modeName] of modeNames.entries()) {
-        let scaleProperties = Scale.get(modeName[1]);
-        let aliasName = scaleProperties.aliases.length > 0 ? "(" + scaleProperties.aliases[0] + ")" : "";
-        let titleText = scaleProperties.name + aliasName + " scale";
-        this.scales[index] = {id: this.scoreIdPrefix + index, name: modeName[1], title: titleText};
-      }
-      console.log("End: setScale");
-    },
-    /**
      * チャーチモードスケールを全て描画
      */
     drawChurchModeScale(key, accidental) {
-      console.log(this.scaleDatas);
+      console.log(this.scaleTypeDatas);
       // チャーチモードスケールごとに楽譜生成
       for (let scaleType of this.scaleTypes) {
         console.log("for scaleDatas");
         console.log(scaleType);
-        console.log(this.scaleDatas[scaleType]);
-        console.log(this.scaleDatas[scaleType].length);
-        for (let [scaleIndex, scaleData] of Object.entries(this.scaleDatas[scaleType])) {
-          console.log(scaleData);
+        for (let [scaleIndex, scaleData] of Object.entries(this.scaleTypeDatas[scaleType])) {
+        // 既に描画されているスケールを削除
+        this.deleteScale(scaleData.id);
+
+        // スケールを描画
+        this.drawScale(scaleData.id, key, accidental, scaleData.name);
         }
-        // 既に描画されているスケールを削除
-        // this.deleteScale(index);
-
-        // スケールを描画
-        // console.log(key);
-        // this.drawScale(index, key, accidental, scale.name);
       }
-
-      this.setScales(this.scaleType);
             // チャーチモードスケールごとに楽譜生成
-      for (let [index, scale] of Object.entries(this.scales)) {
-        // 既に描画されているスケールを削除
-        // this.deleteScale(index);
+      // for (let [index, scale] of Object.entries(this.scales)) {
+      //   // 既に描画されているスケールを削除
+      //   // this.deleteScale(index);
 
-        // スケールを描画
-        console.log(key);
-        this.drawScale(index, key, accidental, scale.name);
-      }
+      //   // スケールを描画
+      //   console.log(key);
+      //   this.drawScale(index, key, accidental, scale.name);
+      // }
     },
     /**
      * 描画されている楽譜を削除
      */
-    deleteScale(scoreNum) {
+    deleteScale(scoreDomId) {
       console.log("DELETE");
-      // let staff = document.getElementById(this.scoreIdPrefix + scoreNum);
-      // while (staff.hasChildNodes()) {
-      //   staff.removeChild(staff.lastChild);
-      // }
+      let staff = document.getElementById(scoreDomId);
+      while (staff.hasChildNodes()) {
+        staff.removeChild(staff.lastChild);
+      }
     },
     /**
      * スケールの楽譜描画
      */
-    drawScale(scoreNum, key, accidental, scaleName) {
+    drawScale(scoreDomId, key, accidental, scaleName) {
       // VexFlowのレンダラー生成
-      let scaleDom = document.getElementById(this.scoreIdPrefix + scoreNum);
+      let scoreDom = document.getElementById(scoreDomId);
 
       let VF = Vex.Flow;
-      let VFRenderer = new VF.Renderer(scaleDom, VF.Renderer.Backends.SVG);
+      let VFRenderer = new VF.Renderer(scoreDom, VF.Renderer.Backends.SVG);
       // console.log(VFRenderer);
 
       // レンダラーのサイズ設定
@@ -384,12 +357,12 @@ export default {
 
     // スケールの初期設定
     // console.log(this.scaleType);
-    this.setScales(this.scaleType);
+    // this.setScales(this.scaleType);
 
     this.setScaleData();
   },
   mounted() {
-    // this.drawChurchModeScale(this.key, this.accidental);
+    this.drawChurchModeScale(this.key, this.accidental);
   },
   watch: {
     key: function(newValue) {
@@ -400,21 +373,13 @@ export default {
     },
     chordDisplay: function(newValue) {
       this.drawChurchModeScale(this.key, this.accidental);
-    },
-    scaleType: function(newValue) {
-      // this.setScales(newValue);
-      // let thisObj = this;
-      // setTimeout(function(){
-      //   thisObj.drawChurchModeScale(thisObj.key, thisObj.accidental);
-      // }, 1000);
-      // this.drawChurchModeScale(this.key, this.accidental);
     }
   }
 };
 </script>
 
 <style lang="scss">
-.scale-contents {
+.modal-scales-chords {
   max-width: 640px;
 }
 

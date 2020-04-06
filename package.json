@@ -1,7 +1,7 @@
 {
-  "name": "enotlas-music-theory",
+  "name": "enotlas-music-tools",
   "version": "1.0.0",
-  "description": "My legendary Nuxt.js project",
+  "description": "Music theory tools project.",
   "author": "Enotlas",
   "private": true,
   "scripts": {

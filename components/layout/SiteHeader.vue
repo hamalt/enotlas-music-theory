@@ -1,7 +1,7 @@
 <template>
   <b-navbar :spaced="true" :shadow="true">
     <template slot="brand">
-      <b-navbar-item tag="router-link" :to="{ path: '/' }">Enotlas tools</b-navbar-item>
+      <b-navbar-item tag="router-link" :to="{ path: '/' }">Enotolas Music tools</b-navbar-item>
     </template>
   </b-navbar>
 </template>

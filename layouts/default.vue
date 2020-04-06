@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="column is-9">
-        <main role="main" class="section">
+        <main role="main">
           <nuxt />
         </main>
       </div>
@@ -47,9 +47,4 @@ html {
 //   margin-right: auto;
 //   margin-left: auto;
 // }
-
-.site-contents {
-  display: block;
-  width: 100%;
-}
 </style>
