@@ -81,23 +81,14 @@ export default {
       // 各スケールタイプごとのモードスケール情報を設定
       for(var[idx, scaleType] of this.scaleTypes.entries()){
           this.scaleDatas[scaleType] = {};
-          console.log(scaleType);
-          console.log(Scale.modeNames(scaleType));
           var modeNames = Scale.modeNames(scaleType);
         for (var [index, modeName] of modeNames.entries()) {
             let scaleProperties = Scale.get(modeName[1]);
             let aliasName = scaleProperties.aliases.length > 0 ? "(" + scaleProperties.aliases[0] + ")" : "";
             let titleText = scaleProperties.name + aliasName + " scale";
-            this.scales[index] = {id: this.scoreIdPrefix + index, name: modeName[1], title: titleText};
+            this.scaleDatas[scaleType][index] = {id: this.scoreIdPrefix + index, name: modeName[1], title: titleText};
         }
       }
-    //   let modeNames = Scale.modeNames(this.key + " " + scaleType);
-    //   for (let [index, modeName] of modeNames.entries()) {
-    //     let scaleProperties = Scale.get(modeName[1]);
-    //     let aliasName = scaleProperties.aliases.length > 0 ? "(" + scaleProperties.aliases[0] + ")" : "";
-    //     let titleText = scaleProperties.name + aliasName + " scale";
-    //     this.scales[index] = {id: this.scoreIdPrefix + index, name: modeName[1], title: titleText};
-    //   }
       console.log("END: setScaleData");
     },
     /**
@@ -130,10 +121,18 @@ export default {
      * チャーチモードスケールを全て描画
      */
     drawChurchModeScale(key, accidental) {
+      console.log(this.scaleDatas);
       // チャーチモードスケールごとに楽譜生成
-      for (let [index, scale] of Object.entries(this.scales)) {
+      for (let scaleType of this.scaleTypes) {
+        console.log("for scaleDatas");
+        console.log(scaleType);
+        console.log(this.scaleDatas[scaleType]);
+        console.log(this.scaleDatas[scaleType].length);
+        for (let [scaleIndex, scaleData] of Object.entries(this.scaleDatas[scaleType])) {
+          console.log(scaleData);
+        }
         // 既に描画されているスケールを削除
-        this.deleteScale(index);
+        // this.deleteScale(index);
 
         // スケールを描画
         // console.log(key);
@@ -170,14 +169,14 @@ export default {
 
       let VF = Vex.Flow;
       let VFRenderer = new VF.Renderer(scaleDom, VF.Renderer.Backends.SVG);
-      console.log(VFRenderer);
+      // console.log(VFRenderer);
 
       // レンダラーのサイズ設定
       VFRenderer.resize(this.rendererWidth, 150);
 
       // レンダラーのコンテキストを取得
       var context = VFRenderer.getContext();
-      console.log(context);
+      // console.log(context);
       // context.clear();
 
       // 五線譜の作成（<canvas>）
@@ -189,15 +188,15 @@ export default {
 
       // 五線譜にコンテキストを設定
       stave.setContext(context);
-      console.log(stave);
+      // console.log(stave);
 
 
       // スケールのデータ（ダイアトニックノートなど）を取得
       let scaleData = Scale.get(key + accidental + "4 " + scaleName);
-      console.log(key);
-      console.log(accidental);
-      console.log(scaleName);
-      console.log(scaleData);
+      // console.log(key);
+      // console.log(accidental);
+      // console.log(scaleName);
+      // console.log(scaleData);
 
       // ダイアトニックノート格納用配列
       // ダイアトニック名格納用配列
@@ -206,12 +205,12 @@ export default {
 
       // スケールのインターバルに合わせてキーのスケールノートを生成
       for (let [index, note] of scaleData.notes.entries()) {
-        console.log("START: FOR");
+        // console.log("START: FOR");
         // 臨時記号が2つ以上あった場合は単純化（例: F## -> G）してデータ取得
         let simplifyNote = Note.simplify(note);
         let noteData = Note.get(simplifyNote);
 
-        console.log(noteData);
+        // console.log(noteData);
 
         let accidentalMark = [];
 
@@ -222,7 +221,7 @@ export default {
 
         // コード表示にチェックが入っているならコードトーン
         if (true === this.chordDisplay) {
-          console.log("START: IF TRUE");
+          // console.log("START: IF TRUE");
           // スケール音の数
           let noteCount = scaleData.notes.length;
 
@@ -291,7 +290,7 @@ export default {
 
           // ダイアトニックな音名設定
           diatonicText = Chord.detect(diatonicChordTones);
-          console.log(diatonicText);
+          // console.log(diatonicText);
 
           //const isInCTriad = isNoteIncludedIn(["C", "E", "G"]);
           // isInCTriad("C4"); // => true
@@ -299,7 +298,7 @@ export default {
           // TODO: この機能で「diatonicChordTones」がメジャースケールの各音に含まれているか調べる
 
         } else {
-          console.log("START: IF ELSE");
+          // console.log("START: IF ELSE");
         // 音名を取得
         let noteName = noteData.pc;
 
@@ -322,7 +321,7 @@ export default {
           keys: tones,
           duration: "w"
         });
-        console.log(diatonicNotes);
+        // console.log(diatonicNotes);
 
         // 臨時記号が存在するなら設定
         for(let i = 0; i < accidentalMark.length; i++) {
@@ -344,19 +343,19 @@ export default {
       // 7/7で音符用Voiceを作成
       let noteVoice = new VF.Voice({ num_beats: 7, beat_value: 1 });
       noteVoice.addTickables(diatonicNotes);
-      console.log(diatonicNotes);
+      // console.log(diatonicNotes);
 
       // 7/7で音名用Voiceを作成
       let nameVoice = new VF.Voice({ num_beats: 7, beat_value: 1 });
       nameVoice.addTickables(diatonicNames);
 
       // Format and justify the notes to 400 pixels.
-      console.log("START: Formatter");
-      console.log(noteVoice);
+      // console.log("START: Formatter");
+      // console.log(noteVoice);
       let formatter = new VF.Formatter()
         .joinVoices([noteVoice, nameVoice])
         .format([noteVoice, nameVoice], (this.rendererWidth - 20));
-      console.log("END: Formatter");
+      // console.log("END: Formatter");
       // Clear musical score.
       // context.clear();
 
@@ -373,7 +372,7 @@ export default {
     this.VF = Vex.Flow;
 
     // スケールの初期設定
-    console.log(this.scaleType);
+    // console.log(this.scaleType);
     this.setScales(this.scaleType);
 
     this.setScaleData();
