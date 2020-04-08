@@ -111,11 +111,8 @@ export default {
      * チャーチモードスケールを全て描画
      */
     drawChurchModeScale(key, accidental) {
-      console.log(this.scaleTypeDatas);
       // チャーチモードスケールごとに楽譜生成
       for (let scaleType of this.scaleTypes) {
-        console.log("for scaleDatas");
-        console.log(scaleType);
         for (let [scaleIndex, scaleData] of Object.entries(this.scaleTypeDatas[scaleType])) {
         // 既に描画されているスケールを削除
         this.deleteScale(scaleData.id);
@@ -124,21 +121,11 @@ export default {
         this.drawScale(scaleData.id, key, accidental, scaleData.name);
         }
       }
-            // チャーチモードスケールごとに楽譜生成
-      // for (let [index, scale] of Object.entries(this.scales)) {
-      //   // 既に描画されているスケールを削除
-      //   // this.deleteScale(index);
-
-      //   // スケールを描画
-      //   console.log(key);
-      //   this.drawScale(index, key, accidental, scale.name);
-      // }
     },
     /**
      * 描画されている楽譜を削除
      */
     deleteScale(scoreDomId) {
-      console.log("DELETE");
       let staff = document.getElementById(scoreDomId);
       while (staff.hasChildNodes()) {
         staff.removeChild(staff.lastChild);
@@ -176,7 +163,12 @@ export default {
 
 
       // スケールのデータ（ダイアトニックノートなど）を取得
+           console.log(key);
+            console.log(scaleName);
+            console.log(accidental);
       let scaleData = Scale.get(key + accidental + "4 " + scaleName);
+            console.log(scaleData);
+            // TODO: C♭4、ウルトラロクリアンの場合、♭が３つになって、vexflowでエラーが起きている可能性あり
       // console.log(key);
       // console.log(accidental);
       // console.log(scaleName);
@@ -220,7 +212,7 @@ export default {
           let root = index;
           let rootToneData = noteData;
           accidentalMark[0] = rootToneData.acc;
-          tones[0] = rootToneData.pc.toLowerCase() + "/" + rootToneData.oct;
+          tones[0] = rootToneData.pc + "/" + rootToneData.oct;
           diatonicChordTones[0] = rootToneData.name;
 
           // 第2音
@@ -238,7 +230,7 @@ export default {
           let secondTone = scaleData.notes[second];
           let secondToneData = Note.get(secondTone);
           accidentalMark[1] = secondToneData.acc;
-          tones[1] = secondToneData.pc.toLowerCase() + "/" + (secondToneData.oct + secondOctUp);
+          tones[1] = secondToneData.pc + "/" + (secondToneData.oct + secondOctUp);
 
           // オクターブアップなら一つ上げる
           if (0 < secondOctUp) {
@@ -263,7 +255,7 @@ export default {
           let thirdTone = scaleData.notes[third];
           let thirdToneData = Note.get(thirdTone);
           accidentalMark[2] = thirdToneData.acc;
-          tones[2] = thirdToneData.pc.toLowerCase() + "/" + (thirdToneData.oct + thirdOctUp);
+          tones[2] = thirdToneData.pc + "/" + (thirdToneData.oct + thirdOctUp);
 
           // オクターブアップなら一つ上げる
           if (0 < thirdOctUp) {
@@ -293,19 +285,20 @@ export default {
         accidentalMark[0] = noteData.acc;
 
         // 音符データ作成
-        tones[0] = noteName.toLowerCase() + "/" + noteOct;
+        tones[0] = noteName + "/" + noteOct;
 
         // ダイアトニックな音名設定
         diatonicText = noteData.pc;
         }
 
+        console.log(tones);
         // ダイアトニックなノート or コードを設定
         diatonicNotes[index] = new VF.StaveNote({
           clef: "treble",
           keys: tones,
           duration: "w"
         });
-        // console.log(diatonicNotes);
+        console.log(diatonicNotes);
 
         // 臨時記号が存在するなら設定
         for(let i = 0; i < accidentalMark.length; i++) {
