@@ -163,12 +163,13 @@ export default {
 
 
       // スケールのデータ（ダイアトニックノートなど）を取得
-           console.log(key);
+          //  console.log(key);
             console.log(scaleName);
-            console.log(accidental);
+            // console.log(accidental);
       let scaleData = Scale.get(key + accidental + "4 " + scaleName);
             console.log(scaleData);
             // TODO: C♭4、ウルトラロクリアンの場合、♭が３つになって、vexflowでエラーが起きている可能性あり
+            // 第7音がトリプルフラットになってる。トリプルフラットについて調べる？
       // console.log(key);
       // console.log(accidental);
       // console.log(scaleName);
@@ -181,12 +182,11 @@ export default {
 
       // スケールのインターバルに合わせてキーのスケールノートを生成
       for (let [index, note] of scaleData.notes.entries()) {
-        // console.log("START: FOR");
         // 臨時記号が2つ以上あった場合は単純化（例: F## -> G）してデータ取得
+        // TODO: simplifyはここで使わない方がいい？
+        // TODO: ♭が3つだった場合のみsimplifyを使いたい
         let simplifyNote = Note.simplify(note);
         let noteData = Note.get(simplifyNote);
-
-        // console.log(noteData);
 
         let accidentalMark = [];
 
@@ -197,16 +197,19 @@ export default {
 
         // コード表示にチェックが入っているならコードトーン
         if (true === this.chordDisplay) {
-          // console.log("START: IF TRUE");
           // スケール音の数
           let noteCount = scaleData.notes.length;
 
           // ダイアトニックコードのトーン設定用
           let diatonicChordTones = [];
 
-          // コードトーンを設定
-          let simplifyNote = Note.simplify(note);
-          let noteData = Note.get(simplifyNote);
+          // // コードトーンを設定
+          // TODO: 以下2行削除予定
+          // let simplifyNote = Note.simplify(note);
+          // let noteData = Note.get(simplifyNote);
+
+          // TODO: ♭が3つ以上あった場合、単純化する
+          //参考: https://github.com/tonaljs/tonal/tree/master/packages/note
 
           // ルート音
           let root = index;
@@ -228,7 +231,8 @@ export default {
           }
 
           let secondTone = scaleData.notes[second];
-          let secondToneData = Note.get(secondTone);
+          let simplifySecondTone = Note.simplify(secondTone);
+          let secondToneData = Note.get(simplifySecondTone);
           accidentalMark[1] = secondToneData.acc;
           tones[1] = secondToneData.pc + "/" + (secondToneData.oct + secondOctUp);
 
@@ -253,7 +257,8 @@ export default {
           }
 
           let thirdTone = scaleData.notes[third];
-          let thirdToneData = Note.get(thirdTone);
+          let simplifyThirdTone = Note.simplify(thirdTone);
+          let thirdToneData = Note.get(simplifyThirdTone);
           accidentalMark[2] = thirdToneData.acc;
           tones[2] = thirdToneData.pc + "/" + (thirdToneData.oct + thirdOctUp);
 
@@ -292,13 +297,14 @@ export default {
         }
 
         console.log(tones);
+        // TODO: ここでフラットや♯が3つ以上あるとエラー発生
         // ダイアトニックなノート or コードを設定
         diatonicNotes[index] = new VF.StaveNote({
           clef: "treble",
           keys: tones,
           duration: "w"
         });
-        console.log(diatonicNotes);
+        // console.log(diatonicNotes);
 
         // 臨時記号が存在するなら設定
         for(let i = 0; i < accidentalMark.length; i++) {
