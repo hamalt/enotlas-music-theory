@@ -30,6 +30,13 @@
           <b-field label="Chord">
             <b-switch v-model="chordDisplay">Display</b-switch>
           </b-field>
+
+          <b-field label="Chord type">
+            <b-field>
+              <b-radio-button v-model="chordType" native-value="triad">Triad</b-radio-button>
+              <b-radio-button v-model="chordType" native-value="tetrad">Tetrad</b-radio-button>
+            </b-field>
+          </b-field>
         </b-field>
 
         <hr />
@@ -70,6 +77,7 @@ export default {
       key: "C",
       accidental: "",
       chordDisplay: true,
+      chordType: "triad",
       scaleTypes: ["major", "minor", "harmonic minor", "melodic minor"],
       scoreIdPrefix: "score-",
       scales: [],
@@ -272,6 +280,42 @@ export default {
             diatonicChordTones[2] = thirdToneData.name;
           }
 
+          // TODO: tetradなら4音目を追加
+          if ("tetrad" === this.chordType) {
+            // 第4音
+            let fourth;
+            let fourthOctUp = 0;
+
+            // オークターブ上の場合
+            if ((root + 6) >= noteCount) {
+              fourth = (root + 6) - noteCount;
+              fourthOctUp = 1;
+            } else {
+              fourth = root + 6;
+            }
+
+            let fourthTone = scaleData.notes[fourth];
+            let fourthToneData = Note.get(fourthTone);
+
+            // 臨時記号が3つ以上あった場合は単純化（例: F### -> G#）してデータ取得、設定
+            if ("bbb" === fourthToneData.acc || "###" === fourthToneData.acc) {
+              let simplifyFourthToneName = Note.simplify(fourthToneData.name);
+              let simplifyFourthToneData = Note.get(simplifyFourthToneName);
+              accidentalMark[3] = simplifyFourthToneData.acc;
+              tones[3] = simplifyFourthToneData.pc + "/" + (simplifyFourthToneData.oct + fourthOctUp);
+            } else {
+              accidentalMark[3] = fourthToneData.acc;
+              tones[3] = fourthToneData.pc + "/" + (fourthToneData.oct + fourthOctUp);
+            }
+
+            // オクターブアップなら一つ上げる
+            if (0 < fourthOctUp) {
+              diatonicChordTones[3] = fourthToneData.pc + (fourthToneData.oct + fourthOctUp);
+            } else {
+              diatonicChordTones[3] = fourthToneData.name;
+            }
+          }
+
           // ダイアトニックな音名設定
           diatonicText = Chord.detect(diatonicChordTones);
 
@@ -366,6 +410,9 @@ export default {
       this.drawChurchModeScale(this.key, newValue);
     },
     chordDisplay: function(newValue) {
+      this.drawChurchModeScale(this.key, this.accidental);
+    },
+    chordType: function(newValue) {
       this.drawChurchModeScale(this.key, this.accidental);
     }
   }
