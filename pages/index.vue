@@ -206,12 +206,13 @@ export default {
               let simplifyRootToneData = Note.get(simplifyRootToneName);
               accidentalMark[0] = simplifyRootToneData.acc;
               tones[0] = simplifyRootToneData.pc + "/" + simplifyRootToneData.oct;
+              diatonicChordTones[0] = simplifyRootToneData.name;
           } else {
               accidentalMark[0] = rootToneData.acc;
               tones[0] = rootToneData.pc + "/" + rootToneData.oct;
+              diatonicChordTones[0] = rootToneData.name;
           }
 
-          diatonicChordTones[0] = rootToneData.name;
 
           // 第2音
           let second;
@@ -234,16 +235,23 @@ export default {
             let simplifySecondToneData = Note.get(simplifySecondToneName);
             accidentalMark[1] = simplifySecondToneData.acc;
             tones[1] = simplifySecondToneData.pc + "/" + (simplifySecondToneData.oct + secondOctUp);
+
+            // オクターブアップなら一つ上げる
+            if (0 < secondOctUp) {
+              diatonicChordTones[1] = simplifySecondToneData.pc + (simplifySecondToneData.oct + secondOctUp);
+            } else {
+              diatonicChordTones[1] = simplifySecondToneData.name;
+            }
           } else {
             accidentalMark[1] = secondToneData.acc;
             tones[1] = secondToneData.pc + "/" + (secondToneData.oct + secondOctUp);
-          }
 
-          // オクターブアップなら一つ上げる
-          if (0 < secondOctUp) {
-            diatonicChordTones[1] = secondToneData.pc + (secondToneData.oct + secondOctUp);
-          } else {
-            diatonicChordTones[1] = secondToneData.name;
+            // オクターブアップなら一つ上げる
+            if (0 < secondOctUp) {
+              diatonicChordTones[1] = secondToneData.pc + (secondToneData.oct + secondOctUp);
+            } else {
+              diatonicChordTones[1] = secondToneData.name;
+            }
           }
 
 
@@ -268,19 +276,27 @@ export default {
             let simplifyThirdToneData = Note.get(simplifyThirdToneName);
             accidentalMark[2] = simplifyThirdToneData.acc;
             tones[2] = simplifyThirdToneData.pc + "/" + (simplifyThirdToneData.oct + thirdOctUp);
+
+            // オクターブアップなら一つ上げる
+            if (0 < thirdOctUp) {
+              diatonicChordTones[2] = simplifyThirdToneData.pc + (simplifyThirdToneData.oct + thirdOctUp);
+            } else {
+              diatonicChordTones[2] = simplifyThirdToneData.name;
+            }
           } else {
             accidentalMark[2] = thirdToneData.acc;
             tones[2] = thirdToneData.pc + "/" + (thirdToneData.oct + thirdOctUp);
+
+            // オクターブアップなら一つ上げる
+            if (0 < thirdOctUp) {
+              diatonicChordTones[2] = thirdToneData.pc + (thirdToneData.oct + thirdOctUp);
+            } else {
+              diatonicChordTones[2] = thirdToneData.name;
+            }
           }
 
-          // オクターブアップなら一つ上げる
-          if (0 < thirdOctUp) {
-            diatonicChordTones[2] = thirdToneData.pc + (thirdToneData.oct + thirdOctUp);
-          } else {
-            diatonicChordTones[2] = thirdToneData.name;
-          }
 
-          // TODO: tetradなら4音目を追加
+          // chordTypeがtetradなら4音目を追加
           if ("tetrad" === this.chordType) {
             // 第4音
             let fourth;
@@ -303,16 +319,24 @@ export default {
               let simplifyFourthToneData = Note.get(simplifyFourthToneName);
               accidentalMark[3] = simplifyFourthToneData.acc;
               tones[3] = simplifyFourthToneData.pc + "/" + (simplifyFourthToneData.oct + fourthOctUp);
+
+              // オクターブアップなら一つ上げる
+              if (0 < fourthOctUp) {
+                diatonicChordTones[3] = simplifyFourthToneData.pc + (simplifyFourthToneData.oct + fourthOctUp);
+              } else {
+                diatonicChordTones[3] = simplifyFourthToneData.name;
+              }
+
             } else {
               accidentalMark[3] = fourthToneData.acc;
               tones[3] = fourthToneData.pc + "/" + (fourthToneData.oct + fourthOctUp);
-            }
 
-            // オクターブアップなら一つ上げる
-            if (0 < fourthOctUp) {
-              diatonicChordTones[3] = fourthToneData.pc + (fourthToneData.oct + fourthOctUp);
-            } else {
-              diatonicChordTones[3] = fourthToneData.name;
+              // オクターブアップなら一つ上げる
+              if (0 < fourthOctUp) {
+                diatonicChordTones[3] = fourthToneData.pc + (fourthToneData.oct + fourthOctUp);
+              } else {
+                diatonicChordTones[3] = fourthToneData.name;
+              }
             }
           }
 
