@@ -38,10 +38,15 @@
           <b-tabs>
             <template v-for="(scaleTypeData, scaleName) in scaleTypeDatas">
               <b-tab-item :label="scaleName" :key="scaleName" :id="getHyphenFillName(scaleName)">
-                <dl class="scales" v-for="scaleData in scaleTypeData" :key="scaleData.name">
-                  <dt>{{key + accidental}} {{ scaleData.title }}</dt>
-                  <dd :id="scaleData.id" class="scales__score"></dd>
-                </dl>
+                <div class="scales" v-for="scaleData in scaleTypeData" :key="scaleData.name">
+                  <div class="scales__name">
+                    <h3>{{key + accidental}} {{ scaleData.title }}</h3>
+                    <span v-for="alias in scaleData.aliases" :key="alias" class="scales__alias">
+                      <small>{{key + accidental}} {{ alias }} scale</small>
+                    </span>
+                  </div>
+                  <div :id="scaleData.id" class="scales__score"></div>
+                </div>
               </b-tab-item>
             </template>
           </b-tabs>
@@ -92,18 +97,16 @@ export default {
      * スケール情報を設定
      */
     setScaleData() {
-    //TODO: 各スケールの連想配列を予めつくって、それらを描画する。IDもスケール名を使う。
-    // 予め描画して、それを表示/非表示させる（再描画がうまくいかないので）
       // 各スケールタイプごとのモードスケール情報を設定
       for (var[idx, scaleType] of this.scaleTypes.entries()) {
           this.scaleTypeDatas[scaleType] = {};
           var modeNames = Scale.modeNames(scaleType);
         for (var [index, modeName] of modeNames.entries()) {
             var scaleProperties = Scale.get(modeName[1]);
-            var aliasName = scaleProperties.aliases.length > 0 ? " (" + scaleProperties.aliases[0] + ")" : "";
-            var titleText = scaleProperties.name + aliasName + " scale";
+            // var aliasName = scaleProperties.aliases.length > 0 ? " (" + scaleProperties.aliases[0] + ")" : "";
+            var titleText = scaleProperties.name + " scale";
             var scaleId = this.getModeId(modeName[1], scaleProperties.aliases, scaleType);
-            this.scaleTypeDatas[scaleType][index] = {id: scaleId, name: modeName[1], title: titleText};
+            this.scaleTypeDatas[scaleType][index] = { id: scaleId, name: modeName[1], title: titleText, aliases: scaleProperties.aliases };
         }
       }
     },
@@ -140,14 +143,12 @@ export default {
 
       let VF = Vex.Flow;
       let VFRenderer = new VF.Renderer(scoreDom, VF.Renderer.Backends.SVG);
-      // console.log(VFRenderer);
 
       // レンダラーのサイズ設定
       VFRenderer.resize(this.rendererWidth, 150);
 
       // レンダラーのコンテキストを取得
       var context = VFRenderer.getContext();
-      // console.log(context);
       // context.clear();
 
       // 五線譜の作成（<canvas>）
@@ -159,21 +160,10 @@ export default {
 
       // 五線譜にコンテキストを設定
       stave.setContext(context);
-      // console.log(stave);
 
 
       // スケールのデータ（ダイアトニックノートなど）を取得
-          //  console.log(key);
-            console.log(scaleName);
-            // console.log(accidental);
       let scaleData = Scale.get(key + accidental + "4 " + scaleName);
-            console.log(scaleData);
-            // TODO: C♭4、ウルトラロクリアンの場合、♭が３つになって、vexflowでエラーが起きている可能性あり
-            // 第7音がトリプルフラットになってる。トリプルフラットについて調べる？
-      // console.log(key);
-      // console.log(accidental);
-      // console.log(scaleName);
-      // console.log(scaleData);
 
       // ダイアトニックノート格納用配列
       // ダイアトニック名格納用配列
@@ -182,17 +172,11 @@ export default {
 
       // スケールのインターバルに合わせてキーのスケールノートを生成
       for (let [index, note] of scaleData.notes.entries()) {
-        // 臨時記号が2つ以上あった場合は単純化（例: F## -> G）してデータ取得
-        // TODO: simplifyはここで使わない方がいい？
-        // TODO: ♭が3つだった場合のみsimplifyを使いたい
-        let simplifyNote = Note.simplify(note);
-        let noteData = Note.get(simplifyNote);
-
+        let noteData = Note.get(note);
         let accidentalMark = [];
-
         let diatonicText = "";
 
-        // ダイアトニックノートを設定
+        // ダイアトニックノート設定用の変数
         let tones = [];
 
         // コード表示にチェックが入っているならコードトーン
@@ -203,19 +187,22 @@ export default {
           // ダイアトニックコードのトーン設定用
           let diatonicChordTones = [];
 
-          // // コードトーンを設定
-          // TODO: 以下2行削除予定
-          // let simplifyNote = Note.simplify(note);
-          // let noteData = Note.get(simplifyNote);
-
-          // TODO: ♭が3つ以上あった場合、単純化する
-          //参考: https://github.com/tonaljs/tonal/tree/master/packages/note
-
+          // コードトーンを設定
           // ルート音
           let root = index;
           let rootToneData = noteData;
-          accidentalMark[0] = rootToneData.acc;
-          tones[0] = rootToneData.pc + "/" + rootToneData.oct;
+
+          // 臨時記号が3つ以上あった場合は単純化（例: F### -> G#）してデータ取得、設定
+          if ("bbb" === rootToneData.acc || "###" === rootToneData.acc) {
+              let simplifyRootToneName = Note.simplify(rootToneData.name);
+              let simplifyRootToneData = Note.get(simplifyRootToneName);
+              accidentalMark[0] = simplifyRootToneData.acc;
+              tones[0] = simplifyRootToneData.pc + "/" + simplifyRootToneData.oct;
+          } else {
+              accidentalMark[0] = rootToneData.acc;
+              tones[0] = rootToneData.pc + "/" + rootToneData.oct;
+          }
+
           diatonicChordTones[0] = rootToneData.name;
 
           // 第2音
@@ -231,10 +218,18 @@ export default {
           }
 
           let secondTone = scaleData.notes[second];
-          let simplifySecondTone = Note.simplify(secondTone);
-          let secondToneData = Note.get(simplifySecondTone);
-          accidentalMark[1] = secondToneData.acc;
-          tones[1] = secondToneData.pc + "/" + (secondToneData.oct + secondOctUp);
+          let secondToneData = Note.get(secondTone);
+
+          // 臨時記号が3つ以上あった場合は単純化（例: F### -> G#）してデータ取得、設定
+          if ("bbb" === secondToneData.acc || "###" === secondToneData.acc) {
+            let simplifySecondToneName = Note.simplify(secondToneData.name);
+            let simplifySecondToneData = Note.get(simplifySecondToneName);
+            accidentalMark[1] = simplifySecondToneData.acc;
+            tones[1] = simplifySecondToneData.pc + "/" + (simplifySecondToneData.oct + secondOctUp);
+          } else {
+            accidentalMark[1] = secondToneData.acc;
+            tones[1] = secondToneData.pc + "/" + (secondToneData.oct + secondOctUp);
+          }
 
           // オクターブアップなら一つ上げる
           if (0 < secondOctUp) {
@@ -257,10 +252,18 @@ export default {
           }
 
           let thirdTone = scaleData.notes[third];
-          let simplifyThirdTone = Note.simplify(thirdTone);
-          let thirdToneData = Note.get(simplifyThirdTone);
-          accidentalMark[2] = thirdToneData.acc;
-          tones[2] = thirdToneData.pc + "/" + (thirdToneData.oct + thirdOctUp);
+          let thirdToneData = Note.get(thirdTone);
+
+          // 臨時記号が3つ以上あった場合は単純化（例: F### -> G#）してデータ取得、設定
+          if ("bbb" === thirdToneData.acc || "###" === thirdToneData.acc) {
+            let simplifyThirdToneName = Note.simplify(thirdToneData.name);
+            let simplifyThirdToneData = Note.get(simplifyThirdToneName);
+            accidentalMark[2] = simplifyThirdToneData.acc;
+            tones[2] = simplifyThirdToneData.pc + "/" + (simplifyThirdToneData.oct + thirdOctUp);
+          } else {
+            accidentalMark[2] = thirdToneData.acc;
+            tones[2] = thirdToneData.pc + "/" + (thirdToneData.oct + thirdOctUp);
+          }
 
           // オクターブアップなら一つ上げる
           if (0 < thirdOctUp) {
@@ -271,7 +274,6 @@ export default {
 
           // ダイアトニックな音名設定
           diatonicText = Chord.detect(diatonicChordTones);
-          // console.log(diatonicText);
 
           //const isInCTriad = isNoteIncludedIn(["C", "E", "G"]);
           // isInCTriad("C4"); // => true
@@ -279,32 +281,27 @@ export default {
           // TODO: この機能で「diatonicChordTones」がメジャースケールの各音に含まれているか調べる
 
         } else {
-          // console.log("START: IF ELSE");
-        // 音名を取得
-        let noteName = noteData.pc;
+          // 臨時記号が3つの場合
+          if ("bbb" === noteData.acc || "###" === noteData.acc) {
+            let simplifyNoteName = Note.simplify(noteData.name);
+            let simplifyNoteData = Note.get(simplifyNoteName);
+            accidentalMark[0] = simplifyNoteData.acc;
+            tones[0] = simplifyNoteData.pc + "/" + simplifyNoteData.oct;
+          } else {
+            accidentalMark[0] = noteData.acc;
+            tones[0] = noteData.pc + "/" + noteData.oct;
+          }
 
-        // オクターブを取得
-        let noteOct = noteData.oct;
-
-        // 臨時記号を取得
-        accidentalMark[0] = noteData.acc;
-
-        // 音符データ作成
-        tones[0] = noteName + "/" + noteOct;
-
-        // ダイアトニックな音名設定
-        diatonicText = noteData.pc;
+          // ダイアトニックな音名設定
+          diatonicText = noteData.pc;
         }
 
-        console.log(tones);
-        // TODO: ここでフラットや♯が3つ以上あるとエラー発生
         // ダイアトニックなノート or コードを設定
         diatonicNotes[index] = new VF.StaveNote({
           clef: "treble",
           keys: tones,
           duration: "w"
         });
-        // console.log(diatonicNotes);
 
         // 臨時記号が存在するなら設定
         for(let i = 0; i < accidentalMark.length; i++) {
@@ -314,8 +311,13 @@ export default {
         }
 
         // ダイアトニック名を設定
+        // chordDisplayがtrueならdiatonicTextは配列（object）なので、一番目を設定し直す
+        if (true === this.chordDisplay && "object" === typeof diatonicText) {
+          diatonicText = diatonicText[0];
+        }
+
         diatonicNames[index] = new VF.TextNote({
-          text: diatonicText[0],
+          text: diatonicText,
           duration: "w"
         })
           .setStave(stave)
@@ -326,19 +328,15 @@ export default {
       // 7/7で音符用Voiceを作成
       let noteVoice = new VF.Voice({ num_beats: 7, beat_value: 1 });
       noteVoice.addTickables(diatonicNotes);
-      // console.log(diatonicNotes);
 
       // 7/7で音名用Voiceを作成
       let nameVoice = new VF.Voice({ num_beats: 7, beat_value: 1 });
       nameVoice.addTickables(diatonicNames);
 
       // Format and justify the notes to 400 pixels.
-      // console.log("START: Formatter");
-      // console.log(noteVoice);
       let formatter = new VF.Formatter()
         .joinVoices([noteVoice, nameVoice])
         .format([noteVoice, nameVoice], (this.rendererWidth - 20));
-      // console.log("END: Formatter");
       // Clear musical score.
       // context.clear();
 
@@ -355,9 +353,6 @@ export default {
     this.VF = Vex.Flow;
 
     // スケールの初期設定
-    // console.log(this.scaleType);
-    // this.setScales(this.scaleType);
-
     this.setScaleData();
   },
   mounted() {
@@ -383,12 +378,24 @@ export default {
 }
 
 .scales {
+  &__alias {
+    display: block;
+    color: #868686;
+
+    // &:not(:first-of-type) {
+    //   &::before {
+    //     content: ",";
+    //   }
+    // }
+  }
+
   &__score {
     margin: 0;
   }
 
   svg {
     width: 100%;
+    overflow: visible;
   }
 }
 
