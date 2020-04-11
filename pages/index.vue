@@ -27,6 +27,17 @@
             </b-field>
           </b-field>
 
+          <b-field label="Scale type">
+            <b-select v-model="keyScaleType" placeholder="Select a scale type">
+              <option value="major">Major</option>
+              <option value="minor">Minor</option>
+              <option value="harmonic minor">Harmonic minor</option>
+              <option value="melodic minor">Melodic minor</option>
+            </b-select>
+          </b-field>
+        </b-field>
+
+        <b-field grouped>
           <b-field label="Chord">
             <b-switch v-model="chordDisplay">Display</b-switch>
           </b-field>
@@ -78,6 +89,8 @@ export default {
       accidental: "",
       chordDisplay: true,
       chordType: "triad",
+      keyScaleType: "major",
+      centerScaleNotes: [],
       scaleTypes: ["major", "minor", "harmonic minor", "melodic minor"],
       scoreIdPrefix: "score-",
       scales: [],
@@ -117,6 +130,15 @@ export default {
             this.scaleTypeDatas[scaleType][index] = { id: scaleId, name: modeName[1], title: titleText, aliases: scaleProperties.aliases };
         }
       }
+    },
+    /**
+     * 判断の中心とするスケールの各音を配列で設定
+     */
+    setCenterScaleNotes() {
+      // スケールのデータ（ダイアトニックノートなど）を取得
+      this.centerScaleNotes = Scale.get(this.key + this.accidental + " " + this.keyScaleType);
+
+      console.log(this.centerScaleNotes);
     },
     /**
      * チャーチモードスケールを全て描画
@@ -184,6 +206,9 @@ export default {
         let accidentalMark = [];
         let diatonicText = "";
 
+        // スケール外の音かを判定する用
+        let notExistNote = false;
+
         // ダイアトニックノート設定用の変数
         let tones = [];
 
@@ -202,15 +227,25 @@ export default {
 
           // 臨時記号が3つ以上あった場合は単純化（例: F### -> G#）してデータ取得、設定
           if ("bbb" === rootToneData.acc || "###" === rootToneData.acc) {
-              let simplifyRootToneName = Note.simplify(rootToneData.name);
-              let simplifyRootToneData = Note.get(simplifyRootToneName);
-              accidentalMark[0] = simplifyRootToneData.acc;
-              tones[0] = simplifyRootToneData.pc + "/" + simplifyRootToneData.oct;
-              diatonicChordTones[0] = simplifyRootToneData.name;
+            let simplifyRootToneName = Note.simplify(rootToneData.name);
+            let simplifyRootToneData = Note.get(simplifyRootToneName);
+            accidentalMark[0] = simplifyRootToneData.acc;
+            tones[0] = simplifyRootToneData.pc + "/" + simplifyRootToneData.oct;
+            diatonicChordTones[0] = simplifyRootToneData.name;
+
+            // 音が中心スケールに存在するか
+            if (false === notExistNote && this.keyScaleType !== scaleName) {
+              notExistNote = this.centerScaleNotes.notes.indexOf(simplifyRootToneData.pc) === -1 ? true : false;
+            }
           } else {
-              accidentalMark[0] = rootToneData.acc;
-              tones[0] = rootToneData.pc + "/" + rootToneData.oct;
-              diatonicChordTones[0] = rootToneData.name;
+            accidentalMark[0] = rootToneData.acc;
+            tones[0] = rootToneData.pc + "/" + rootToneData.oct;
+            diatonicChordTones[0] = rootToneData.name;
+
+            // 音が中心スケールに存在するか
+            if (false === notExistNote && this.keyScaleType !== scaleName) {
+              notExistNote = this.centerScaleNotes.notes.indexOf(rootToneData.pc) === -1 ? true : false;
+            }
           }
 
 
@@ -242,6 +277,11 @@ export default {
             } else {
               diatonicChordTones[1] = simplifySecondToneData.name;
             }
+
+            // 音が中心スケールに存在するか
+            if (false === notExistNote && this.keyScaleType !== scaleName) {
+              notExistNote = this.centerScaleNotes.notes.indexOf(simplifySecondToneData.pc) === -1 ? true : false;
+            }
           } else {
             accidentalMark[1] = secondToneData.acc;
             tones[1] = secondToneData.pc + "/" + (secondToneData.oct + secondOctUp);
@@ -251,6 +291,11 @@ export default {
               diatonicChordTones[1] = secondToneData.pc + (secondToneData.oct + secondOctUp);
             } else {
               diatonicChordTones[1] = secondToneData.name;
+            }
+
+            // 音が中心スケールに存在するか
+            if (false === notExistNote && this.keyScaleType !== scaleName) {
+              notExistNote = this.centerScaleNotes.notes.indexOf(secondToneData.pc) === -1 ? true : false;
             }
           }
 
@@ -283,6 +328,11 @@ export default {
             } else {
               diatonicChordTones[2] = simplifyThirdToneData.name;
             }
+
+            // 音が中心スケールに存在するか
+            if (false === notExistNote && this.keyScaleType !== scaleName) {
+              notExistNote = this.centerScaleNotes.notes.indexOf(simplifyThirdToneData.pc) === -1 ? true : false;
+            }
           } else {
             accidentalMark[2] = thirdToneData.acc;
             tones[2] = thirdToneData.pc + "/" + (thirdToneData.oct + thirdOctUp);
@@ -292,6 +342,11 @@ export default {
               diatonicChordTones[2] = thirdToneData.pc + (thirdToneData.oct + thirdOctUp);
             } else {
               diatonicChordTones[2] = thirdToneData.name;
+            }
+
+            // 音が中心スケールに存在するか
+            if (false === notExistNote && this.keyScaleType !== scaleName) {
+              notExistNote = this.centerScaleNotes.notes.indexOf(thirdToneData.pc) === -1 ? true : false;
             }
           }
 
@@ -327,6 +382,10 @@ export default {
                 diatonicChordTones[3] = simplifyFourthToneData.name;
               }
 
+              // 音が中心スケールに存在するか
+              if (false === notExistNote && this.keyScaleType !== scaleName) {
+                notExistNote = this.centerScaleNotes.notes.indexOf(simplifyFourthToneData.pc) === -1 ? true : false;
+              }
             } else {
               accidentalMark[3] = fourthToneData.acc;
               tones[3] = fourthToneData.pc + "/" + (fourthToneData.oct + fourthOctUp);
@@ -336,6 +395,11 @@ export default {
                 diatonicChordTones[3] = fourthToneData.pc + (fourthToneData.oct + fourthOctUp);
               } else {
                 diatonicChordTones[3] = fourthToneData.name;
+              }
+
+              // 音が中心スケールに存在するか
+              if (false === notExistNote && this.keyScaleType !== scaleName) {
+                notExistNote = this.centerScaleNotes.notes.indexOf(fourthToneData.pc) === -1 ? true : false;
               }
             }
           }
@@ -353,11 +417,27 @@ export default {
           if ("bbb" === noteData.acc || "###" === noteData.acc) {
             let simplifyNoteName = Note.simplify(noteData.name);
             let simplifyNoteData = Note.get(simplifyNoteName);
+            console.log(simplifyNoteData);
             accidentalMark[0] = simplifyNoteData.acc;
             tones[0] = simplifyNoteData.pc + "/" + simplifyNoteData.oct;
+
+            // 音が中心スケールに存在するか
+            console.log(this.keyScaleType);
+            console.log(scaleName);
+            if (false === notExistNote && this.keyScaleType !== scaleName) {
+              notExistNote = this.centerScaleNotes.notes.indexOf(simplifyNoteData.pc) === -1 ? true : false;
+            }
           } else {
+            console.log(noteData);
             accidentalMark[0] = noteData.acc;
             tones[0] = noteData.pc + "/" + noteData.oct;
+
+            // 音が中心スケールに存在するか
+                        console.log(this.keyScaleType);
+            console.log(scaleName);
+            if (false === notExistNote && this.keyScaleType !== scaleName) {
+              notExistNote = this.centerScaleNotes.notes.indexOf(noteData.pc) === -1 ? true : false;
+            }
           }
 
           // ダイアトニックな音名設定
@@ -378,6 +458,11 @@ export default {
           }
         }
 
+        // TODO: スケールに無い音だったら色付け
+        if (notExistNote) {
+          diatonicNotes[index].setStyle({fillStyle: "red", strokeStyle: "red"});
+        }
+
         // ダイアトニック名を設定
         // chordDisplayがtrueならdiatonicTextは配列（object）なので、一番目を設定し直す
         if (true === this.chordDisplay && "object" === typeof diatonicText) {
@@ -387,10 +472,15 @@ export default {
         diatonicNames[index] = new VF.TextNote({
           text: diatonicText,
           duration: "w"
-        })
-          .setStave(stave)
-          .setLine(12)
-          .setJustification(VF.TextNote.Justification.LEFT);
+        });
+
+        diatonicNames[index].setStave(stave);
+        diatonicNames[index].setLine(12);
+        diatonicNames[index].setJustification(VF.TextNote.Justification.LEFT);
+        // TODO: 特定の条件のとき、setStyleメソッドで色付けを行う
+        if (notExistNote) {
+          diatonicNames[index].setStyle({fillStyle: "red", strokeStyle: "red"});
+        }
       }
 
       // 7/7で音符用Voiceを作成
@@ -422,6 +512,9 @@ export default {
 
     // スケールの初期設定
     this.setScaleData();
+
+    // 選択中のキー＆スケールの各音を設定
+    this.setCenterScaleNotes();
   },
   mounted() {
     this.drawChurchModeScale(this.key, this.accidental);
@@ -437,6 +530,10 @@ export default {
       this.drawChurchModeScale(this.key, this.accidental);
     },
     chordType: function(newValue) {
+      this.drawChurchModeScale(this.key, this.accidental);
+    },
+    keyScaleType: function(newValue) {
+      this.setCenterScaleNotes();
       this.drawChurchModeScale(this.key, this.accidental);
     }
   }
