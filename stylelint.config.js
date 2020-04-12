@@ -6,6 +6,11 @@ module.exports = {
     "stylelint-scss"
   ],
   rules: {
-
+    "function-name-case": [
+      "lower",
+      {
+        "ignoreFunctions": ["findColorInvert"]
+      }
+    ]
   }
 }

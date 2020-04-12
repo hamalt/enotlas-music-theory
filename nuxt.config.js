@@ -33,7 +33,7 @@ export default {
   /*
    ** Global CSS
    */
-  // css: ['sanitize.css'],
+  css: ['~/assets/scss/style.scss'],
   /*
    ** Plugins to load before mounting the App
    */
@@ -54,7 +54,10 @@ export default {
     '@nuxtjs/pwa',
     // Doc: https://github.com/nuxt-community/dotenv-module
     '@nuxtjs/dotenv',
-    'nuxt-buefy',
+    ['nuxt-buefy', {
+      css: false,
+      // materialDesignIcons: false
+    }],
     'nuxt-webfontloader'
   ],
   webfontloader: {
