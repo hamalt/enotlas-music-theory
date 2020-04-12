@@ -2,7 +2,7 @@
   <div class="site-contents">
     <section class="hero">
       <div class="hero-body">
-        <h1 class="title">Modal Scales &amp; Chords</h1>
+        <h1 class="title">Mode List</h1>
         <h2 class="subtitle">Modal scales &amp; chords list.</h2>
       </div>
     </section>
