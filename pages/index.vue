@@ -96,7 +96,8 @@ export default {
       scales: [],
       scaleTypeDatas: {},
       VF: Object,
-      rendererWidth: 620
+      rendererWidth: 620,
+      highlightColor:"#006ce4"
     };
   },
   methods: {
@@ -458,9 +459,9 @@ export default {
           }
         }
 
-        // TODO: スケールに無い音だったら色付け
+        // スケールに無い音だったら色付け
         if (notExistNote) {
-          diatonicNotes[index].setStyle({fillStyle: "red", strokeStyle: "red"});
+          diatonicNotes[index].setStyle({fillStyle: this.highlightColor, strokeStyle: this.highlightColor});
         }
 
         // ダイアトニック名を設定
@@ -477,9 +478,10 @@ export default {
         diatonicNames[index].setStave(stave);
         diatonicNames[index].setLine(12);
         diatonicNames[index].setJustification(VF.TextNote.Justification.LEFT);
-        // TODO: 特定の条件のとき、setStyleメソッドで色付けを行う
+
+        // 特定の条件のとき、setStyleメソッドで色付けを行う
         if (notExistNote) {
-          diatonicNames[index].setStyle({fillStyle: "red", strokeStyle: "red"});
+          diatonicNames[index].setStyle({fillStyle: this.highlightColor, strokeStyle: this.highlightColor});
         }
       }
 
