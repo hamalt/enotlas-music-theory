@@ -8,96 +8,112 @@
     </section>
 
     <section class="section">
-      <div class="modal-scales-chords">
-        <div class="modal-scales-chords__section">
-          <h2 class="title is-3">キーとスケールを選択</h2>
-          <b-field grouped>
-            <b-field label="Key">
-              <b-field>
-                <b-select v-model="key" placeholder="Select a key">
-                  <option value="C">C</option>
-                  <option value="D">D</option>
-                  <option value="E">E</option>
-                  <option value="F">F</option>
-                  <option value="G">G</option>
-                  <option value="A">A</option>
-                  <option value="B">B</option>
+      <div class="columns is-variable bd-klmn-columns is-0">
+        <div class="column is-4">
+          <div class="operation-boards">
+            <div class="operation-boards__section">
+              <h3 class="title is-3">Key</h3>
+              <p class="subtitle">キーを選択</p>
+              <b-field label="Key">
+                <b-field>
+                  <b-select v-model="key" placeholder="Select a key">
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                  </b-select>
+                  <b-radio-button v-model="accidental" native-value>(None)</b-radio-button>
+                  <b-radio-button v-model="accidental" native-value="#">♯</b-radio-button>
+                  <b-radio-button v-model="accidental" native-value="b">♭</b-radio-button>
+                </b-field>
+              </b-field>
+
+              <b-field label="Scale type">
+                <b-select v-model="keyScaleType" placeholder="Select a scale type">
+                  <option value="major">Major</option>
+                  <option value="minor">Minor</option>
+                  <option value="harmonic minor">Harmonic minor</option>
+                  <option value="melodic minor">Melodic minor</option>
                 </b-select>
-                <b-radio-button v-model="accidental" native-value>(None)</b-radio-button>
-                <b-radio-button v-model="accidental" native-value="#">♯</b-radio-button>
-                <b-radio-button v-model="accidental" native-value="b">♭</b-radio-button>
               </b-field>
-            </b-field>
+            </div>
 
-            <b-field label="Scale type">
-              <b-select v-model="keyScaleType" placeholder="Select a scale type">
-                <option value="major">Major</option>
-                <option value="minor">Minor</option>
-                <option value="harmonic minor">Harmonic minor</option>
-                <option value="melodic minor">Melodic minor</option>
-              </b-select>
-            </b-field>
-          </b-field>
-        </div>
+            <div class="operation-boards__section">
+              <h3 class="title is-3">Check Chord</h3>
+              <p class="subtitle">調べたいコードを選択</p>
+              <chord-selector
+                :rootTone="key"
+                :rootToneAcc="accidental"
+                :chordQuality="keyScaleType"
+                :chordData.sync="checkChordData"
+              />
+            </div>
 
-        <div class="modal-scales-chords__section">
-          <h2 class="title is-3">コードを選択</h2>
-          <chord-selector
-            :rootTone="key"
-            :rootToneAcc="accidental"
-            :chordQuality="keyScaleType"
-            :chordData.sync="checkChordData"
-          ></chord-selector>
-        </div>
+            <div class="operation-boards__section">
+              <h3 class="title is-3">Display</h3>
+              <p class="subtitle">表示形式</p>
+              <b-field grouped>
+                <b-field label="Chord">
+                  <b-switch v-model="chordDisplay">Display</b-switch>
+                </b-field>
 
-        <div class="modal-scales-chords__section">
-          <h2 class="title is-3">借用しているモード</h2>
-          <ul>
-            <li
-              v-for="includedScaleName in organizedIncludedScaleTypes"
-              :key="'included-' + getHyphenFillName(includedScaleName)"
-            >{{ includedScaleName }}</li>
-          </ul>
-        </div>
-
-        <div class="modal-scales-chords__section">
-          <h2 class="title is-3">表示方法</h2>
-          <b-field grouped>
-            <b-field label="Chord">
-              <b-switch v-model="chordDisplay">Display</b-switch>
-            </b-field>
-
-            <b-field label="Chord type">
-              <b-field>
-                <b-radio-button v-model="chordType" native-value="triad">Triad</b-radio-button>
-                <b-radio-button v-model="chordType" native-value="tetrad">Tetrad</b-radio-button>
+                <b-field label="Chord type">
+                  <b-field>
+                    <b-radio-button v-model="chordType" native-value="triad">Triad</b-radio-button>
+                    <b-radio-button v-model="chordType" native-value="tetrad">Tetrad</b-radio-button>
+                  </b-field>
+                </b-field>
               </b-field>
-            </b-field>
-          </b-field>
+            </div>
+          </div>
         </div>
 
-        <hr />
+        <div class="column is-8">
+          <div class="mode-results">
+            <div class="mode-results__list">
+              <h2 class="title is-3">借用しているモード</h2>
+              <ul>
+                <li
+                  v-for="includedScaleName in organizedIncludedScaleTypes"
+                  :key="'included-' + getHyphenFillName(includedScaleName)"
+                >{{ includedScaleName }}</li>
+              </ul>
+            </div>
 
-        <div class="scale-scores">
-          <b-tabs v-model="scoreDisplayTab">
-            <template v-for="(scaleTypeData, scaleName) in scaleTypeDatas">
-              <b-tab-item :label="scaleName" :key="scaleName" :id="getHyphenFillName(scaleName)">
-                <div class="scales" v-for="scaleData in scaleTypeData" :key="scaleData.name">
-                  <div class="scales__name">
-                    <h3>{{key + accidental}} {{ scaleData.title }}</h3>
-                    <span v-for="alias in scaleData.aliases" :key="alias" class="scales__alias">
-                      <small>{{key + accidental}} {{ alias }} scale</small>
-                    </span>
-                  </div>
-                  <div :id="scaleData.id" class="scales__score"></div>
-                </div>
-              </b-tab-item>
-            </template>
-          </b-tabs>
+            <div class="mode-results__list">
+              <div class="scale-scores">
+                <b-tabs v-model="scoreDisplayTab">
+                  <template v-for="(scaleTypeData, scaleName) in scaleTypeDatas">
+                    <b-tab-item
+                      :label="scaleName"
+                      :key="scaleName"
+                      :id="getHyphenFillName(scaleName)"
+                    >
+                      <div class="scales" v-for="scaleData in scaleTypeData" :key="scaleData.name">
+                        <div class="scales__name">
+                          <h3>{{key + accidental}} {{ scaleData.title }}</h3>
+                          <span
+                            v-for="alias in scaleData.aliases"
+                            :key="alias"
+                            class="scales__alias"
+                          >
+                            <small>{{key + accidental}} {{ alias }} scale</small>
+                          </span>
+                        </div>
+                        <div :id="scaleData.id" class="scales__score"></div>
+                      </div>
+                    </b-tab-item>
+                  </template>
+                </b-tabs>
+              </div>
+              <!-- .scale-scores -->
+            </div>
+          </div>
         </div>
-        <!-- .scale-scores -->
       </div>
-      <!-- .modal-scales-chords -->
     </section>
   </div>
   <!-- .scale-contents -->
@@ -615,6 +631,14 @@ export default {
 </script>
 
 <style lang="scss">
+.operation-boards {
+  &__section {
+    &:not(:first-of-type) {
+      margin-top: 3rem;
+    }
+  }
+}
+
 .modal-scales-chords {
   max-width: 640px;
 

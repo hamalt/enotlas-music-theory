@@ -1,36 +1,35 @@
 <template>
   <div class="chord-selector">
     <dl>
-      <dt>Chord name:</dt>
-      <dd>{{ this.chordName }}</dd>
+      <dt class="is-size-7">Chord name:</dt>
+      <dd class="is-size-1">{{ this.formatedChordName }}</dd>
     </dl>
 
-    <b-field grouped>
-      <b-field label="Root tone">
-        <b-field>
-          <b-select v-model="chordTone" placeholder="Select a root tone">
-            <option value="C">C</option>
-            <option value="D">D</option>
-            <option value="E">E</option>
-            <option value="F">F</option>
-            <option value="G">G</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-          </b-select>
-          <b-radio-button v-model="chordAcc" native-value>(None)</b-radio-button>
-          <b-radio-button v-model="chordAcc" native-value="#">♯</b-radio-button>
-          <b-radio-button v-model="chordAcc" native-value="b">♭</b-radio-button>
-        </b-field>
-      </b-field>
-
-      <b-field label="Quality">
-        <b-select v-model="chordType" placeholder="Select a quality">
-          <option
-            v-for="chordTypeName in this.allChordTypes"
-            :key="chordTypeName"
-          >{{ chordTypeName }}</option>
+    <b-field label="Root tone">
+      <b-field>
+        <b-select v-model="chordTone" placeholder="Select a root tone">
+          <option value="C">C</option>
+          <option value="D">D</option>
+          <option value="E">E</option>
+          <option value="F">F</option>
+          <option value="G">G</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
         </b-select>
+        <b-radio-button v-model="chordAcc" native-value>(None)</b-radio-button>
+        <b-radio-button v-model="chordAcc" native-value="#">♯</b-radio-button>
+        <b-radio-button v-model="chordAcc" native-value="b">♭</b-radio-button>
       </b-field>
+    </b-field>
+
+    <b-field label="Quality">
+      <b-select v-model="chordType" placeholder="Select a quality">
+        <option
+          v-for="chordTypeName in this.allChordTypes"
+          :key="chordTypeName"
+          :value="chordTypeName"
+        >{{ getFormatedChordTypeName(chordTypeName) }}</option>
+      </b-select>
     </b-field>
   </div>
 </template>
@@ -66,16 +65,24 @@ export default {
     // すべてのコード名を設定
     this.allChordTypes = ChordType.names();
 
+    // 渡されたPropsをdataに保存
     this.chordTone = this.rootTone;
     this.chordAcc = this.rootToneAcc;
     this.chordType = this.chordQuality;
-
-    // コード名を設定
-    // this.chordName = this.rootTone + this.rootToneAcc + " " + this.chordQuality;
   },
   mounted() {
   },
   methods: {
+    /**
+     * 整形されたコードタイプの名前を取得
+     */
+    getFormatedChordTypeName(chordName) {
+      console.log(chordName);
+      let chordTypeData = Chord.get(chordName);
+      console.log(chordTypeData);
+      let fromatedChordTypeName = chordTypeData.aliases.length > 0 ? chordTypeData.aliases[0] : chordTypeData.name;
+      return fromatedChordTypeName;
+    }
   },
   watch: {
     chordTone: function(newValue) {
@@ -91,13 +98,15 @@ export default {
   computed: {
     chordName: {
       get: function() {
-        // TODO: コードネームの表記をわかりやすくしたい
         return this.chordTone + this.chordAcc + " " + this.chordType;
       }
-      // set: function(newValue) {
-      //   let chordNameData = Chord.get(newValue);
-      //   this.$emit('update:chordData', chordNameData);
-      // }
+    },
+    formatedChordName: {
+      get: function() {
+        let chordNameData = Chord.get(this.chordTone + this.chordAcc + this.chordType);
+        let fromatedQualityName = chordNameData.aliases.length > 0 ? chordNameData.aliases[0] : chordNameData.name;
+        return this.chordTone + this.chordAcc + fromatedQualityName;
+      }
     }
   }
 }

@@ -3,12 +3,12 @@
     <site-header />
 
     <div class="columns is-variable bd-klmn-columns is-0">
-      <div class="column is-3">
+      <div class="column is-2">
         <div class="section">
           <site-sidebar />
         </div>
       </div>
-      <div class="column is-9">
+      <div class="column is-10">
         <main role="main">
           <nuxt />
         </main>
