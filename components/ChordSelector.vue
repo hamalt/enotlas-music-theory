@@ -91,6 +91,7 @@ export default {
   computed: {
     chordName: {
       get: function() {
+        // TODO: コードネームの表記をわかりやすくしたい
         return this.chordTone + this.chordAcc + " " + this.chordType;
       }
       // set: function(newValue) {
