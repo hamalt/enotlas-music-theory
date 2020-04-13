@@ -2,58 +2,84 @@
   <div class="site-contents">
     <section class="hero">
       <div class="hero-body">
-        <h1 class="title">Mode List</h1>
+        <h1 class="title is-1">Mode List</h1>
         <h2 class="subtitle">Modal scales &amp; chords list.</h2>
       </div>
     </section>
 
     <section class="section">
       <div class="modal-scales-chords">
-        <b-field grouped>
-          <b-field label="Key">
-            <b-field>
-              <b-select v-model="key" placeholder="Select a key">
-                <option value="C">C</option>
-                <option value="D">D</option>
-                <option value="E">E</option>
-                <option value="F">F</option>
-                <option value="G">G</option>
-                <option value="A">A</option>
-                <option value="B">B</option>
+        <div class="modal-scales-chords__section">
+          <h2 class="title is-3">キーとスケールを選択</h2>
+          <b-field grouped>
+            <b-field label="Key">
+              <b-field>
+                <b-select v-model="key" placeholder="Select a key">
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                  <option value="E">E</option>
+                  <option value="F">F</option>
+                  <option value="G">G</option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                </b-select>
+                <b-radio-button v-model="accidental" native-value>(None)</b-radio-button>
+                <b-radio-button v-model="accidental" native-value="#">♯</b-radio-button>
+                <b-radio-button v-model="accidental" native-value="b">♭</b-radio-button>
+              </b-field>
+            </b-field>
+
+            <b-field label="Scale type">
+              <b-select v-model="keyScaleType" placeholder="Select a scale type">
+                <option value="major">Major</option>
+                <option value="minor">Minor</option>
+                <option value="harmonic minor">Harmonic minor</option>
+                <option value="melodic minor">Melodic minor</option>
               </b-select>
-              <b-radio-button v-model="accidental" native-value>(None)</b-radio-button>
-              <b-radio-button v-model="accidental" native-value="#">♯</b-radio-button>
-              <b-radio-button v-model="accidental" native-value="b">♭</b-radio-button>
             </b-field>
           </b-field>
+        </div>
 
-          <b-field label="Scale type">
-            <b-select v-model="keyScaleType" placeholder="Select a scale type">
-              <option value="major">Major</option>
-              <option value="minor">Minor</option>
-              <option value="harmonic minor">Harmonic minor</option>
-              <option value="melodic minor">Melodic minor</option>
-            </b-select>
-          </b-field>
-        </b-field>
+        <div class="modal-scales-chords__section">
+          <h2 class="title is-3">コードを選択</h2>
+          <chord-selector
+            :rootTone="key"
+            :rootToneAcc="accidental"
+            :chordQuality="keyScaleType"
+            :chordData.sync="checkChordData"
+          ></chord-selector>
+        </div>
 
-        <b-field grouped>
-          <b-field label="Chord">
-            <b-switch v-model="chordDisplay">Display</b-switch>
-          </b-field>
+        <div class="modal-scales-chords__section">
+          <h2 class="title is-3">借用しているモード</h2>
+          <ul>
+            <li
+              v-for="includedScaleName in organizedIncludedScaleTypes"
+              :key="'included-' + getHyphenFillName(includedScaleName)"
+            >{{ includedScaleName }}</li>
+          </ul>
+        </div>
 
-          <b-field label="Chord type">
-            <b-field>
-              <b-radio-button v-model="chordType" native-value="triad">Triad</b-radio-button>
-              <b-radio-button v-model="chordType" native-value="tetrad">Tetrad</b-radio-button>
+        <div class="modal-scales-chords__section">
+          <h2 class="title is-3">表示方法</h2>
+          <b-field grouped>
+            <b-field label="Chord">
+              <b-switch v-model="chordDisplay">Display</b-switch>
+            </b-field>
+
+            <b-field label="Chord type">
+              <b-field>
+                <b-radio-button v-model="chordType" native-value="triad">Triad</b-radio-button>
+                <b-radio-button v-model="chordType" native-value="tetrad">Tetrad</b-radio-button>
+              </b-field>
             </b-field>
           </b-field>
-        </b-field>
+        </div>
 
         <hr />
 
         <div class="scale-scores">
-          <b-tabs>
+          <b-tabs v-model="scoreDisplayTab">
             <template v-for="(scaleTypeData, scaleName) in scaleTypeDatas">
               <b-tab-item :label="scaleName" :key="scaleName" :id="getHyphenFillName(scaleName)">
                 <div class="scales" v-for="scaleData in scaleTypeData" :key="scaleData.name">
@@ -79,10 +105,13 @@
 
 <script>
 import Vex from "vexflow";
-import { Note, Interval, Scale, Key, Chord } from "@tonaljs/tonal";
+import { Note, Interval, Scale, Key, Chord, ChordType, Pcset } from "@tonaljs/tonal";
+import ChordSelector from "~/components/ChordSelector.vue";
 
 export default {
-  components: {},
+  components: {
+    ChordSelector
+  },
   data() {
     return {
       key: "C",
@@ -92,12 +121,13 @@ export default {
       keyScaleType: "major",
       centerScaleNotes: [],
       scaleTypes: ["major", "minor", "harmonic minor", "melodic minor"],
-      scoreIdPrefix: "score-",
-      scales: [],
       scaleTypeDatas: {},
+      checkChordData: {},
+      includedScaleTypes: [],
       VF: Object,
       rendererWidth: 620,
-      highlightColor:"#006ce4"
+      highlightColor:"#006ce4",
+      scoreDisplayTab: 0
     };
   },
   methods: {
@@ -138,8 +168,28 @@ export default {
     setCenterScaleNotes() {
       // スケールのデータ（ダイアトニックノートなど）を取得
       this.centerScaleNotes = Scale.get(this.key + this.accidental + " " + this.keyScaleType);
+    },
+    /**
+     * チェックしたいコードが属している各モード（スケール）を設定
+     */
+    checkIncludedScaleOfChord(chordName) {
+      // 借用モード（スケール）一覧を初期化
+      this.includedScaleTypes = [];
 
-      console.log(this.centerScaleNotes);
+      for (let scaleType of this.scaleTypes) {
+        for (let [scaleIndex, scaleTypeData] of Object.entries(this.scaleTypeDatas[scaleType])) {
+          // スケールのデータ（ダイアトニックノートなど）を取得
+          let scaleData = Scale.get(this.key + this.accidental + " " + scaleTypeData.name);
+
+          // チェックするコードのがスケール内に存在するかチェック
+          let scaleDataNotes = scaleData.notes;
+          let isSubsetChord = Pcset.isSubsetOf(scaleDataNotes);
+          if (true === isSubsetChord(this.checkChordData.notes)) {
+            // 存在するスケールをプッシュ
+            this.includedScaleTypes.push(scaleData.type);
+          }
+        }
+      }
     },
     /**
      * チャーチモードスケールを全て描画
@@ -147,12 +197,12 @@ export default {
     drawChurchModeScale(key, accidental) {
       // チャーチモードスケールごとに楽譜生成
       for (let scaleType of this.scaleTypes) {
-        for (let [scaleIndex, scaleData] of Object.entries(this.scaleTypeDatas[scaleType])) {
+        for (let [scaleIndex, scaleTypeData] of Object.entries(this.scaleTypeDatas[scaleType])) {
         // 既に描画されているスケールを削除
-        this.deleteScale(scaleData.id);
+        this.deleteScale(scaleTypeData.id);
 
         // スケールを描画
-        this.drawScale(scaleData.id, key, accidental, scaleData.name);
+        this.drawScale(scaleTypeData.id, key, accidental, scaleTypeData.name);
         }
       }
     },
@@ -192,9 +242,9 @@ export default {
       // 五線譜にコンテキストを設定
       stave.setContext(context);
 
-
       // スケールのデータ（ダイアトニックノートなど）を取得
       let scaleData = Scale.get(key + accidental + "4 " + scaleName);
+      let scaleDataNotes = scaleData.notes;
 
       // ダイアトニックノート格納用配列
       // ダイアトニック名格納用配列
@@ -202,7 +252,7 @@ export default {
       let diatonicNames = new Array();
 
       // スケールのインターバルに合わせてキーのスケールノートを生成
-      for (let [index, note] of scaleData.notes.entries()) {
+      for (let [index, note] of scaleDataNotes.entries()) {
         let noteData = Note.get(note);
         let accidentalMark = [];
         let diatonicText = "";
@@ -216,7 +266,7 @@ export default {
         // コード表示にチェックが入っているならコードトーン
         if (true === this.chordDisplay) {
           // スケール音の数
-          let noteCount = scaleData.notes.length;
+          let noteCount = scaleDataNotes.length;
 
           // ダイアトニックコードのトーン設定用
           let diatonicChordTones = [];
@@ -262,7 +312,7 @@ export default {
             second = root + 2;
           }
 
-          let secondTone = scaleData.notes[second];
+          let secondTone = scaleDataNotes[second];
           let secondToneData = Note.get(secondTone);
 
           // 臨時記号が3つ以上あった場合は単純化（例: F### -> G#）してデータ取得、設定
@@ -313,7 +363,7 @@ export default {
             third = root + 4;
           }
 
-          let thirdTone = scaleData.notes[third];
+          let thirdTone = scaleDataNotes[third];
           let thirdToneData = Note.get(thirdTone);
 
           // 臨時記号が3つ以上あった場合は単純化（例: F### -> G#）してデータ取得、設定
@@ -366,7 +416,7 @@ export default {
               fourth = root + 6;
             }
 
-            let fourthTone = scaleData.notes[fourth];
+            let fourthTone = scaleDataNotes[fourth];
             let fourthToneData = Note.get(fourthTone);
 
             // 臨時記号が3つ以上あった場合は単純化（例: F### -> G#）してデータ取得、設定
@@ -407,35 +457,23 @@ export default {
 
           // ダイアトニックな音名設定
           diatonicText = Chord.detect(diatonicChordTones);
-
-          //const isInCTriad = isNoteIncludedIn(["C", "E", "G"]);
-          // isInCTriad("C4"); // => true
-          // isInCTriad("C#4"); // => false
-          // TODO: この機能で「diatonicChordTones」がメジャースケールの各音に含まれているか調べる
-
         } else {
           // 臨時記号が3つの場合
           if ("bbb" === noteData.acc || "###" === noteData.acc) {
             let simplifyNoteName = Note.simplify(noteData.name);
             let simplifyNoteData = Note.get(simplifyNoteName);
-            console.log(simplifyNoteData);
             accidentalMark[0] = simplifyNoteData.acc;
             tones[0] = simplifyNoteData.pc + "/" + simplifyNoteData.oct;
 
             // 音が中心スケールに存在するか
-            console.log(this.keyScaleType);
-            console.log(scaleName);
             if (false === notExistNote && this.keyScaleType !== scaleName) {
               notExistNote = this.centerScaleNotes.notes.indexOf(simplifyNoteData.pc) === -1 ? true : false;
             }
           } else {
-            console.log(noteData);
             accidentalMark[0] = noteData.acc;
             tones[0] = noteData.pc + "/" + noteData.oct;
 
             // 音が中心スケールに存在するか
-                        console.log(this.keyScaleType);
-            console.log(scaleName);
             if (false === notExistNote && this.keyScaleType !== scaleName) {
               notExistNote = this.centerScaleNotes.notes.indexOf(noteData.pc) === -1 ? true : false;
             }
@@ -517,15 +555,21 @@ export default {
 
     // 選択中のキー＆スケールの各音を設定
     this.setCenterScaleNotes();
+
+    // チェック用コードのデータを取得して設定
+    this.checkChordData = Chord.get(this.key + this.accidental + " " + this.keyScaleType);
   },
   mounted() {
+    // DOM読み込み完了後にモードのスケールを描画
     this.drawChurchModeScale(this.key, this.accidental);
   },
   watch: {
     key: function(newValue) {
+      this.setCenterScaleNotes();
       this.drawChurchModeScale(newValue, this.accidental);
     },
     accidental: function(newValue) {
+      this.setCenterScaleNotes();
       this.drawChurchModeScale(this.key, newValue);
     },
     chordDisplay: function(newValue) {
@@ -535,8 +579,36 @@ export default {
       this.drawChurchModeScale(this.key, this.accidental);
     },
     keyScaleType: function(newValue) {
+      // 表示しているタブも切り替え
+      switch(newValue) {
+        case "major":
+          this.scoreDisplayTab = 0;
+          break;
+        case "minor":
+          this.scoreDisplayTab = 1;
+          break;
+        case "harmonic minor":
+          this.scoreDisplayTab = 2;
+          break;
+        case "melodic minor":
+          this.scoreDisplayTab = 3;
+          break;
+        default:
+          break;
+      }
+
       this.setCenterScaleNotes();
       this.drawChurchModeScale(this.key, this.accidental);
+    },
+    checkChordData: function(newValue) {
+      this.checkIncludedScaleOfChord();
+    }
+  },
+  computed: {
+    organizedIncludedScaleTypes: {
+      get: function() {
+          return Array.from(new Set(this.includedScaleTypes));
+      }
     }
   }
 };
@@ -545,6 +617,12 @@ export default {
 <style lang="scss">
 .modal-scales-chords {
   max-width: 640px;
+
+  &__section {
+    &:not(:first-of-type) {
+      margin-top: 24px;
+    }
+  }
 }
 
 .scales {
