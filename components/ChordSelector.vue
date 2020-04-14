@@ -6,7 +6,7 @@
     </dl>
 
     <b-field label="Root tone">
-      <b-field>
+      <b-field type="is-success">
         <b-select v-model="chordTone" placeholder="Select a root tone">
           <option value="C">C</option>
           <option value="D">D</option>
@@ -16,14 +16,14 @@
           <option value="A">A</option>
           <option value="B">B</option>
         </b-select>
-        <b-radio-button v-model="chordAcc" native-value>(None)</b-radio-button>
-        <b-radio-button v-model="chordAcc" native-value="#">♯</b-radio-button>
-        <b-radio-button v-model="chordAcc" native-value="b">♭</b-radio-button>
+        <b-radio-button v-model="chordAcc" native-value type="is-success">(None)</b-radio-button>
+        <b-radio-button v-model="chordAcc" native-value="#" type="is-success">♯</b-radio-button>
+        <b-radio-button v-model="chordAcc" native-value="b" type="is-success">♭</b-radio-button>
       </b-field>
     </b-field>
 
-    <b-field label="Quality">
-      <b-select v-model="chordType" placeholder="Select a quality">
+    <b-field label="Quality" type="is-success">
+      <b-select v-model="chordType" placeholder="Select a quality" type="is-success">
         <option
           v-for="chordTypeName in this.allChordTypes"
           :key="chordTypeName"
@@ -77,9 +77,7 @@ export default {
      * 整形されたコードタイプの名前を取得
      */
     getFormatedChordTypeName(chordName) {
-      console.log(chordName);
       let chordTypeData = Chord.get(chordName);
-      console.log(chordTypeData);
       let fromatedChordTypeName = chordTypeData.aliases.length > 0 ? chordTypeData.aliases[0] : chordTypeData.name;
       return fromatedChordTypeName;
     }

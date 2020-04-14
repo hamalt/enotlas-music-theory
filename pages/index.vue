@@ -7,15 +7,14 @@
       </div>
     </section>
 
-    <section class="section">
-      <div class="columns is-variable bd-klmn-columns is-0">
-        <div class="column is-4">
+    <div class="mode-contents">
+      <div class="mode-contents__utility">
+        <section class="section">
           <div class="operation-boards">
             <div class="operation-boards__section">
-              <h3 class="title is-3">Key</h3>
-              <p class="subtitle">キーを選択</p>
+              <h3 class="title is-3">Scale</h3>
               <b-field label="Key">
-                <b-field>
+                <b-field type="is-primary">
                   <b-select v-model="key" placeholder="Select a key">
                     <option value="C">C</option>
                     <option value="D">D</option>
@@ -31,7 +30,7 @@
                 </b-field>
               </b-field>
 
-              <b-field label="Scale type">
+              <b-field label="Type" type="is-primary">
                 <b-select v-model="keyScaleType" placeholder="Select a scale type">
                   <option value="major">Major</option>
                   <option value="minor">Minor</option>
@@ -42,8 +41,7 @@
             </div>
 
             <div class="operation-boards__section">
-              <h3 class="title is-3">Check Chord</h3>
-              <p class="subtitle">調べたいコードを選択</p>
+              <h3 class="title is-3">Check chord</h3>
               <chord-selector
                 :rootTone="key"
                 :rootToneAcc="accidental"
@@ -54,37 +52,79 @@
 
             <div class="operation-boards__section">
               <h3 class="title is-3">Display</h3>
-              <p class="subtitle">表示形式</p>
               <b-field grouped>
                 <b-field label="Chord">
-                  <b-switch v-model="chordDisplay">Display</b-switch>
+                  <b-switch v-model="chordDisplay" type="is-secondary">Display</b-switch>
                 </b-field>
 
-                <b-field label="Chord type">
-                  <b-field>
-                    <b-radio-button v-model="chordType" native-value="triad">Triad</b-radio-button>
-                    <b-radio-button v-model="chordType" native-value="tetrad">Tetrad</b-radio-button>
+                <transition name="fade">
+                  <b-field label="Chord type" v-if="chordDisplay">
+                    <b-field>
+                      <b-radio-button
+                        v-model="chordType"
+                        native-value="triad"
+                        type="is-secondary"
+                      >Triad</b-radio-button>
+                      <b-radio-button
+                        v-model="chordType"
+                        native-value="tetrad"
+                        type="is-secondary"
+                      >Tetrad</b-radio-button>
+                    </b-field>
                   </b-field>
-                </b-field>
+                </transition>
               </b-field>
             </div>
           </div>
-        </div>
-
-        <div class="column is-8">
+        </section>
+      </div>
+      <!-- .mode-contents__utility -->
+      <div class="mode-contents__results">
+        <section class="section">
           <div class="mode-results">
-            <div class="mode-results__list">
-              <h2 class="title is-3">借用しているモード</h2>
-              <ul>
-                <li
+            <div class="mode-results__source">
+              <b-field grouped group-multiline>
+                <div class="control">
+                  <b-taglist attached>
+                    <b-tag type="is-dark" size="is-large">Scale</b-tag>
+                    <b-tag type="is-primary" size="is-large">{{tonicName}} {{ this.keyScaleType }}</b-tag>
+                  </b-taglist>
+                </div>
+
+                <div class="control">
+                  <b-taglist attached>
+                    <b-tag type="is-dark" size="is-large">Chord</b-tag>
+                    <b-tag type="is-success" size="is-large">
+                      {{ this.formatedChordName }}
+                      <small
+                        class="is-size-7"
+                      >({{ this.checkChordData.name }})</small>
+                    </b-tag>
+                  </b-taglist>
+                </div>
+              </b-field>
+            </div>
+            <div class="mode-results__modal-interchange">
+              <h2 class="title is-3">
+                Mode including
+                <small class="has-text-success">{{ this.formatedChordName }}</small> in
+                <small class="has-text-primary">{{tonicName}} {{ this.keyScaleType }} scale</small>
+              </h2>
+              <p class="subtitle">(modal interchange)</p>
+              <b-taglist>
+                <b-tag
                   v-for="includedScaleName in organizedIncludedScaleTypes"
                   :key="'included-' + getHyphenFillName(includedScaleName)"
-                >{{ includedScaleName }}</li>
-              </ul>
+                  size="is-medium"
+                >{{tonicName}} {{ includedScaleName }}</b-tag>
+              </b-taglist>
             </div>
 
-            <div class="mode-results__list">
+            <div class="mode-results__mode-list">
               <div class="scale-scores">
+                <h2 class="title is-3">
+                  <span class="has-text-primary">{{ keyScaleName }} scale</span> Parallel modes
+                </h2>
                 <b-tabs v-model="scoreDisplayTab">
                   <template v-for="(scaleTypeData, scaleName) in scaleTypeDatas">
                     <b-tab-item
@@ -94,13 +134,13 @@
                     >
                       <div class="scales" v-for="scaleData in scaleTypeData" :key="scaleData.name">
                         <div class="scales__name">
-                          <h3>{{key + accidental}} {{ scaleData.title }}</h3>
+                          <h3>{{tonicName}} {{ scaleData.title }}</h3>
                           <span
                             v-for="alias in scaleData.aliases"
                             :key="alias"
                             class="scales__alias"
                           >
-                            <small>{{key + accidental}} {{ alias }} scale</small>
+                            <small>{{tonicName}} {{ alias }} scale</small>
                           </span>
                         </div>
                         <div :id="scaleData.id" class="scales__score"></div>
@@ -112,9 +152,11 @@
               <!-- .scale-scores -->
             </div>
           </div>
-        </div>
+        </section>
       </div>
-    </section>
+      <!-- .mode-contents__results -->
+    </div>
+    <!-- .mode-contents -->
   </div>
   <!-- .scale-contents -->
 </template>
@@ -142,7 +184,7 @@ export default {
       includedScaleTypes: [],
       VF: Object,
       rendererWidth: 620,
-      highlightColor:"#006ce4",
+      highlightColor:"#a22ad6",
       scoreDisplayTab: 0
     };
   },
@@ -621,9 +663,25 @@ export default {
     }
   },
   computed: {
+    tonicName: {
+      get: function() {
+        return this.key + this.accidental;
+      }
+    },
+    keyScaleName: {
+      get: function() {
+        return this.key + this.accidental + " " + this.keyScaleType;
+      }
+    },
     organizedIncludedScaleTypes: {
       get: function() {
           return Array.from(new Set(this.includedScaleTypes));
+      }
+    },
+    formatedChordName: {
+      get: function() {
+        let fromatedQualityName = this.checkChordData.aliases.length > 0 ? this.checkChordData.aliases[0] : this.checkChordData.name;
+        return this.checkChordData.tonic + fromatedQualityName;
       }
     }
   }
@@ -631,11 +689,60 @@ export default {
 </script>
 
 <style lang="scss">
+.mode-contents {
+  display: flex;
+
+  &__utility {
+    order: 2;
+    width: 20%;
+    border-left: solid 1px #eee;
+  }
+
+  &__results {
+    order: 1;
+    width: 80%;
+  }
+}
+
 .operation-boards {
   &__section {
+    padding-bottom: 1.5rem;
+    border-bottom: solid 1px #eee;
+
     &:not(:first-of-type) {
-      margin-top: 3rem;
+      margin-top: 1.5rem;
     }
+  }
+}
+
+.mode-results {
+  &__source {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 3rem;
+
+    dl {
+      display: flex;
+      font-size: 1.5rem;
+
+      &:not(:first-of-type) {
+        margin-left: 1.5rem;
+        padding-left: 1.5rem;
+        border-left: solid 1px #eee;
+      }
+    }
+
+    dt {
+      &::after {
+        content: "=";
+        padding-left: 0.2em;
+        padding-right: 0.2em;
+      }
+    }
+  }
+
+  &__modal-interchange {
+    margin-bottom: 3rem;
   }
 }
 

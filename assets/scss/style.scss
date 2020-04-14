@@ -8,9 +8,11 @@ $success: #3cb371;
 $success-invert: findColorInvert($success);
 $twitter: #4099ff;
 $twitter-invert: findColorInvert($twitter);
+$secondary: #a22ad6;
+$secondary-invert: findColorInvert($secondary);
 
 // Setup $colors to use as bulma classes (e.g. 'is-twitter')
-$colors: ("white": ($white, $black), "black": ($black, $white), "light": ($light, $light-invert), "dark": ($dark, $dark-invert), "primary": ($primary, $primary-invert), "info": ($info, $info-invert), "success": ($success, $success-invert), "warning": ($warning, $warning-invert), "danger": ($danger, $danger-invert), "twitter": ($twitter, $twitter-invert));
+$colors: ("white": ($white, $black), "black": ($black, $white), "light": ($light, $light-invert), "dark": ($dark, $dark-invert), "primary": ($primary, $primary-invert), "info": ($info, $info-invert), "success": ($success, $success-invert), "warning": ($warning, $warning-invert), "danger": ($danger, $danger-invert), "twitter": ($twitter, $twitter-invert), "secondary": ($secondary, $secondary-invert));
 
 // Links
 $link: $primary;
