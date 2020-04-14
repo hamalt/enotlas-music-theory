@@ -51,12 +51,12 @@ export default {
    ** Nuxt.js modules
    */
   modules: [
+    '@nuxtjs/axios',
     '@nuxtjs/pwa',
     // Doc: https://github.com/nuxt-community/dotenv-module
     '@nuxtjs/dotenv',
     ['nuxt-buefy', {
       css: false,
-      // materialDesignIcons: false
     }],
     'nuxt-webfontloader'
   ],

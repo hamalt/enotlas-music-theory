@@ -1,5 +1,6 @@
 <template>
   <footer id="site-footer" class="footer">
+    <google-form></google-form>
     <div class="content has-text-centered">
       <p>
         <strong>Enotolas Music tools</strong> by
@@ -15,8 +16,12 @@
 </template>
 
 <script>
-export default {
+import GoogleForm from "~/components/GoogleForm.vue";
 
+export default {
+  components: {
+    GoogleForm
+  }
 }
 </script>
 
