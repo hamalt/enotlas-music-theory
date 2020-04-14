@@ -690,17 +690,24 @@ export default {
 
 <style lang="scss">
 .mode-contents {
-  display: flex;
+  @media screen and (min-width: 769px), print {
+    display: flex;
+  }
 
   &__utility {
-    order: 2;
-    width: 20%;
     border-left: solid 1px #eee;
+
+    @media screen and (min-width: 769px), print {
+      order: 2;
+      width: 320px;
+    }
   }
 
   &__results {
-    order: 1;
-    width: 80%;
+    @media screen and (min-width: 769px), print {
+      order: 1;
+      width: calc(100% - 320px);
+    }
   }
 }
 
