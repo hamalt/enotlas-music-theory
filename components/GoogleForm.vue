@@ -19,6 +19,7 @@
           name="entry.839337160"
           placeholder="Bugs, new features, etc."
           v-model="form.message"
+          required
         ></b-input>
       </b-field>
       <p class="has-text-centered">
