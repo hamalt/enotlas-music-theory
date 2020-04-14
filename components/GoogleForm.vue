@@ -38,7 +38,7 @@ export default {
       submitParams.append('entry.1045781291', this.form.email);
       submitParams.append('entry.839337160', this.form.message);
       console.log(submitParams);
-      const CORS_PROXY = 'https://tools.enotlas.net/';
+      const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
       const GOOGLE_FORM_ACTION = 'https://docs.google.com/forms/u/0/d/e/1FAIpQLScae4nE8LEy8yzgi2M39dC9uGdwl4kJovrlhNCRRwMDF_rpNA/formResponse';
       this.$axios.$post(CORS_PROXY + GOOGLE_FORM_ACTION, submitParams)
       .then(response => {
