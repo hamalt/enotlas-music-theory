@@ -46,6 +46,5 @@ export default {
   padding-left: 1.5rem;
   background-color: #f7f7f7;
   border-top: solid 1px #eee;
-  // padding: 3rem 1.5rem 6rem;
 }
 </style>
