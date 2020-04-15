@@ -2,13 +2,13 @@
   <div class="site-wrapper">
     <site-header />
 
-    <div class="site-contents columns is-variable bd-klmn-columns is-0">
-      <div class="site-contents__sidebar column is-2">
+    <div class="site-contents">
+      <div class="site-contents__sidebar">
         <div class="section">
           <site-sidebar />
         </div>
       </div>
-      <div class="site-contents__main column is-10">
+      <div class="site-contents__main">
         <main role="main">
           <nuxt />
         </main>
@@ -42,13 +42,26 @@ html {
 }
 
 .site-contents {
+  @media screen and (min-width: 1024px) {
+    display: flex;
+  }
+
   &__sidebar {
+    width: 16.66667%;
     background-color: #f7f7f7;
     border-right: solid 1px #eee;
+
+    @media screen and (max-width: 1023px) {
+      display: none;
+    }
   }
 
   &__main {
     display: block;
+
+    @media screen and (min-width: 1024px) {
+      width: 83.33333%;
+    }
   }
 }
 

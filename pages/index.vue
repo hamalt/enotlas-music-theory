@@ -1,5 +1,5 @@
 <template>
-  <div class="site-contents">
+  <div class="mode-list">
     <section class="hero">
       <div class="hero-body">
         <h1 class="title is-1">Mode List</h1>
@@ -688,7 +688,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .mode-contents {
   @media screen and (min-width: 769px), print {
     display: flex;

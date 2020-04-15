@@ -37,12 +37,15 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .site-footer {
+  position: relative;
+  z-index: 1;
   display: block;
   padding-right: 1.5rem;
   padding-left: 1.5rem;
-  background-color: #fafafa;
+  background-color: #f7f7f7;
+  border-top: solid 1px #eee;
   // padding: 3rem 1.5rem 6rem;
 }
 </style>

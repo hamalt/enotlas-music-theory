@@ -34,7 +34,7 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss" scoped>
 .tempo-calc-contents {
   display: block;
 }
