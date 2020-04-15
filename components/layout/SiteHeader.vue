@@ -6,7 +6,7 @@
 
     <template slot="start">
       <b-navbar-item tag="nuxt-link" :to="{ path: '/' }" class="is-hidden-desktop">Mode List</b-navbar-item>
-      <b-navbar-item :to="{ path: '/tempo-calc' }" class="is-hidden-desktop">Tempo Calculator</b-navbar-item>
+      <!-- <b-navbar-item :to="{ path: '/tempo-calc' }" class="is-hidden-desktop">Tempo Calculator</b-navbar-item> -->
     </template>
   </b-navbar>
 </template>
