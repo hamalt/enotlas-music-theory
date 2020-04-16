@@ -167,6 +167,14 @@ import { Note, Interval, Scale, Key, Chord, ChordType, Pcset } from "@tonaljs/to
 import ChordSelector from "~/components/ChordSelector.vue";
 
 export default {
+  head() {
+    return {
+      title: "Mode List | Enotlas Music Tools",
+      meta: [
+        { hid: 'description', name: 'description', content: 'Modal scales & chords list.' }
+      ]
+    }
+  },
   components: {
     ChordSelector
   },
