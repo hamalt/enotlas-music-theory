@@ -50,6 +50,6 @@
     "stylelint": "^13.3.2",
     "stylelint-config-standard": "^20.0.0",
     "stylelint-scss": "^3.17.0",
-    "vexflow": "^1.2.93"
+    "vexflow": "^3.0.4"
   }
 }
