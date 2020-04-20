@@ -3,7 +3,7 @@
     <section class="hero">
       <div class="hero-body">
         <h1 class="title is-1">Mode List</h1>
-        <h2 class="subtitle">Modal scales &amp; chords list.</h2>
+        <p class="subtitle">Modal scales &amp; chords list.</p>
       </div>
     </section>
 
@@ -11,8 +11,14 @@
       <div class="mode-contents__utility">
         <section class="section">
           <div class="operation-boards">
+            <h3 class="title is-3">
+              <b-icon icon="cog-outline" size="is-medium"></b-icon>Setting
+            </h3>
             <div class="operation-boards__section">
-              <h3 class="title is-3">Scale</h3>
+              <h3 class="title is-4">
+                Scale:
+                <span class="has-text-primary">{{ tonicName }} {{ this.keyScaleType }}</span>
+              </h3>
               <b-field label="Key">
                 <b-field type="is-primary">
                   <b-select v-model="key" placeholder="Select a key">
@@ -41,7 +47,11 @@
             </div>
 
             <div class="operation-boards__section">
-              <h3 class="title is-3">Check chord</h3>
+              <h4 class="title is-4">
+                Chord:
+                <span class="has-text-success">{{ formatedChordName }}</span>
+                <small class="is-size-7 has-text-success">({{ this.checkChordData.name }})</small>
+              </h4>
               <chord-selector
                 :rootTone="key"
                 :rootToneAcc="accidental"
@@ -51,10 +61,10 @@
             </div>
 
             <div class="operation-boards__section">
-              <h3 class="title is-3">Display</h3>
+              <h4 class="title is-4">Display type</h4>
               <b-field grouped>
                 <b-field label="Chord">
-                  <b-switch v-model="chordDisplay" type="is-secondary">Display</b-switch>
+                  <b-switch v-model="chordDisplay" type="is-secondary">On</b-switch>
                 </b-field>
 
                 <transition name="fade">
@@ -82,42 +92,24 @@
       <div class="mode-contents__results">
         <section class="section">
           <div class="mode-results">
-            <div class="mode-results__source">
-              <b-field grouped group-multiline>
-                <div class="control">
-                  <b-taglist attached>
-                    <b-tag type="is-dark" size="is-large">Scale</b-tag>
-                    <b-tag type="is-primary" size="is-large">{{tonicName}} {{ this.keyScaleType }}</b-tag>
-                  </b-taglist>
-                </div>
-
-                <div class="control">
-                  <b-taglist attached>
-                    <b-tag type="is-dark" size="is-large">Chord</b-tag>
-                    <b-tag type="is-success" size="is-large">
-                      {{ this.formatedChordName }}
-                      <small
-                        class="is-size-7"
-                      >({{ this.checkChordData.name }})</small>
-                    </b-tag>
-                  </b-taglist>
-                </div>
-              </b-field>
-            </div>
+            <!-- <div class="mode-results__source"></div> -->
             <div class="mode-results__modal-interchange">
               <h2 class="title is-3">
                 Mode including
-                <small class="has-text-success">{{ this.formatedChordName }}</small> in
+                <small class="has-text-success">{{ this.formatedChordName }}</small> chord in
                 <small class="has-text-primary">{{tonicName}} {{ this.keyScaleType }} scale</small>
               </h2>
               <p class="subtitle">(modal interchange)</p>
-              <b-taglist>
+              <b-taglist v-if="0 < organizedIncludedScaleTypes.length">
                 <b-tag
                   v-for="includedScaleName in organizedIncludedScaleTypes"
                   :key="'included-' + getHyphenFillName(includedScaleName)"
                   size="is-medium"
                 >{{tonicName}} {{ includedScaleName }}</b-tag>
               </b-taglist>
+              <p v-else>
+                <span class="has-text-danger">Not found.</span>
+              </p>
             </div>
 
             <div class="mode-results__mode-list">
@@ -132,18 +124,18 @@
                       :key="scaleName"
                       :id="getHyphenFillName(scaleName)"
                     >
-                      <div class="scales" v-for="scaleData in scaleTypeData" :key="scaleData.name">
-                        <div class="scales__name">
-                          <h3>{{tonicName}} {{ scaleData.title }}</h3>
+                      <div class="scale" v-for="scaleData in scaleTypeData" :key="scaleData.name">
+                        <div class="scale__name">
+                          <h3 class="is-size-4">{{tonicName}} {{ scaleData.title }}</h3>
                           <span
                             v-for="alias in scaleData.aliases"
                             :key="alias"
-                            class="scales__alias"
+                            class="scale__alias"
                           >
                             <small>{{tonicName}} {{ alias }} scale</small>
                           </span>
                         </div>
-                        <div :id="scaleData.id" class="scales__score"></div>
+                        <div :id="scaleData.id" class="scale__score"></div>
                       </div>
                     </b-tab-item>
                   </template>
@@ -688,8 +680,17 @@ export default {
     },
     formatedChordName: {
       get: function() {
-        let fromatedQualityName = this.checkChordData.aliases.length > 0 ? this.checkChordData.aliases[0] : this.checkChordData.name;
-        return this.checkChordData.tonic + fromatedQualityName;
+        let formatedQualityName = this.checkChordData.aliases.length > 0 ? this.checkChordData.aliases[0] : this.checkChordData.name;
+        console.log(formatedQualityName);
+
+        // 表記方法を整形する
+        switch(formatedQualityName) {
+          case "M":
+            formatedQualityName = "";
+            break;
+        }
+
+        return this.checkChordData.tonic + formatedQualityName;
       }
     }
   }
@@ -698,6 +699,8 @@ export default {
 
 <style lang="scss" scoped>
 .mode-contents {
+  $utility-width: 385px;
+
   @media screen and (min-width: 769px), print {
     display: flex;
   }
@@ -707,14 +710,14 @@ export default {
 
     @media screen and (min-width: 769px), print {
       order: 2;
-      width: 320px;
+      width: $utility-width;
     }
   }
 
   &__results {
     @media screen and (min-width: 769px), print {
       order: 1;
-      width: calc(100% - 320px);
+      width: calc(100% - #{$utility-width});
     }
   }
 }
@@ -771,7 +774,11 @@ export default {
   }
 }
 
-.scales {
+.scale {
+  &:not(:first-of-type) {
+    margin-top: 3rem;
+  }
+
   &__alias {
     display: block;
     color: #868686;
@@ -785,11 +792,11 @@ export default {
 
   &__score {
     margin: 0;
-  }
 
-  svg {
-    width: 100%;
-    overflow: visible;
+    /deep/ svg {
+      max-width: 100%;
+      overflow: visible;
+    }
   }
 }
 

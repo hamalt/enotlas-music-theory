@@ -72,4 +72,8 @@ html {
     transition: opacity 0.7s;
   }
 }
+
+.title .icon {
+  margin-right: 0.3em;
+}
 </style>

@@ -1,9 +1,11 @@
 <template>
   <div class="chord-selector">
-    <dl>
-      <dt class="is-size-7">Chord name:</dt>
-      <dd class="is-size-1">{{ this.formatedChordName }}</dd>
-    </dl>
+    <!-- <dl>
+      <dt class="is-size-7">Selected:</dt>
+      <dd class="is-size-1">
+        <span class="has-text-success">{{ this.formatedChordName }}</span>
+      </dd>
+    </dl>-->
 
     <b-field label="Root tone">
       <b-field type="is-success">
@@ -64,6 +66,7 @@ export default {
   created() {
     // すべてのコード名を設定
     this.allChordTypes = ChordType.names();
+    console.log(this.allChordTypes);
 
     // 渡されたPropsをdataに保存
     this.chordTone = this.rootTone;
@@ -78,8 +81,16 @@ export default {
      */
     getFormatedChordTypeName(chordName) {
       let chordTypeData = Chord.get(chordName);
-      let fromatedChordTypeName = chordTypeData.aliases.length > 0 ? chordTypeData.aliases[0] : chordTypeData.name;
-      return fromatedChordTypeName;
+      let formatedQualityName = chordTypeData.aliases.length > 0 ? chordTypeData.aliases[0] : chordTypeData.name;
+
+      // 表記方法を整形する
+      switch(formatedQualityName) {
+        case "M":
+          formatedQualityName = "Maj";
+          break;
+      }
+
+      return formatedQualityName;
     }
   },
   watch: {
@@ -102,8 +113,16 @@ export default {
     formatedChordName: {
       get: function() {
         let chordNameData = Chord.get(this.chordTone + this.chordAcc + this.chordType);
-        let fromatedQualityName = chordNameData.aliases.length > 0 ? chordNameData.aliases[0] : chordNameData.name;
-        return this.chordTone + this.chordAcc + fromatedQualityName;
+        let formatedQualityName = chordNameData.aliases.length > 0 ? chordNameData.aliases[0] : chordNameData.name;
+
+        // 表記方法を整形する
+        switch(formatedQualityName) {
+          case "M":
+            formatedQualityName = "";
+            break;
+        }
+
+        return this.chordTone + this.chordAcc + formatedQualityName;
       }
     }
   }
