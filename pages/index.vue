@@ -50,7 +50,7 @@
               <h4 class="title is-4">
                 Chord:
                 <span class="has-text-success">{{ formatedChordName }}</span>
-                <small class="is-size-7 has-text-success">({{ this.checkChordData.name }})</small>
+                <small class="is-size-6 has-text-success">({{ this.checkChordData.name }})</small>
               </h4>
               <chord-selector
                 :rootTone="key"
@@ -95,7 +95,7 @@
             <!-- <div class="mode-results__source"></div> -->
             <div class="mode-results__modal-interchange">
               <h2 class="title is-3">
-                Mode including
+                <b-icon icon="playlist-music" size="is-medium"></b-icon>Mode including
                 <small class="has-text-success">{{ this.formatedChordName }}</small> chord in
                 <small class="has-text-primary">{{tonicName}} {{ this.keyScaleType }} scale</small>
               </h2>
@@ -114,9 +114,16 @@
 
             <div class="mode-results__mode-list">
               <div class="scale-scores">
-                <h2 class="title is-3">
-                  <span class="has-text-primary">{{ keyScaleName }} scale</span> Parallel modes
-                </h2>
+                <div class="mode-results__mode-list-description">
+                  <h2 class="title is-3">
+                    <b-icon icon="playlist-music" size="is-medium"></b-icon>
+                    <span class="has-text-primary">{{ keyScaleName }} scale</span> Parallel modes
+                  </h2>
+                  <p class="subtitle">
+                    <i class="has-background-secondary"></i>
+                    <span class="has-text-secondary">Color</span> - modal interchange chord
+                  </p>
+                </div>
                 <b-tabs v-model="scoreDisplayTab">
                   <template v-for="(scaleTypeData, scaleName) in scaleTypeDatas">
                     <b-tab-item
@@ -761,6 +768,16 @@ export default {
 
   &__modal-interchange {
     margin-bottom: 3rem;
+  }
+
+  &__mode-list-description {
+    margin-bottom: 1rem;
+
+    /deep/ p i {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+    }
   }
 }
 
