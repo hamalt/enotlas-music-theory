@@ -49,7 +49,7 @@
     "sass-loader": "^8.0.2",
     "stylelint": "^13.3.2",
     "stylelint-config-standard": "^20.0.0",
-    "stylelint-scss": "^3.17.0",
+    "stylelint-scss": "^3.17.1",
     "vexflow": "^3.0.8"
   }
 }
