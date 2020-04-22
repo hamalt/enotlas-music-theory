@@ -49,7 +49,7 @@
             <div class="operation-boards__section">
               <h4 class="title is-4">
                 Chord:
-                <span class="has-text-success">{{ formatedChordName }}</span>
+                <span class="has-text-success" v-html="formatedChordName"></span>
                 <small class="is-size-6 has-text-success">({{ this.checkChordData.name }})</small>
               </h4>
               <chord-selector
@@ -96,7 +96,7 @@
             <div class="mode-results__modal-interchange">
               <h2 class="title is-3">
                 <b-icon icon="playlist-music" size="is-medium"></b-icon>Mode including
-                <small class="has-text-success">{{ this.formatedChordName }}</small> chord in
+                <small class="has-text-success" v-html="formatedChordName"></small> chord in
                 <small class="has-text-primary">{{tonicName}} {{ this.keyScaleType }} scale</small>
               </h2>
               <p class="subtitle">(modal interchange)</p>
@@ -235,14 +235,13 @@ export default {
       this.centerScaleNotes = Scale.get(this.key + this.accidental + " " + this.keyScaleType);
     },
     /**
-     * チェックしたいコードが属している各モード（スケール）を設定
+     * 設定したコードが、現在設定しているキーとそのモードに属しているかをチェックし、属しているスケールを返す
      */
-    checkIncludedScaleOfChord(chordName) {
+    checkIncludedScaleOfChord() {
       // 借用モード（スケール）一覧を初期化
       this.includedScaleTypes = [];
 
-      for (let scaleType of this.scaleTypes) {
-        for (let [scaleIndex, scaleTypeData] of Object.entries(this.scaleTypeDatas[scaleType])) {
+        for (let [scaleIndex, scaleTypeData] of Object.entries(this.scaleTypeDatas[this.keyScaleType])) {
           // スケールのデータ（ダイアトニックノートなど）を取得
           let scaleData = Scale.get(this.key + this.accidental + " " + scaleTypeData.name);
 
@@ -254,7 +253,6 @@ export default {
             this.includedScaleTypes.push(scaleData.type);
           }
         }
-      }
     },
     /**
      * チャーチモードスケールを全て描画
@@ -521,7 +519,9 @@ export default {
           }
 
           // ダイアトニックな音名設定
+          // console.log(diatonicChordTones);
           diatonicText = Chord.detect(diatonicChordTones);
+          // console.log(diatonicText);
         } else {
           // 臨時記号が3つの場合
           if ("bbb" === noteData.acc || "###" === noteData.acc) {
@@ -632,16 +632,20 @@ export default {
     key: function(newValue) {
       this.setCenterScaleNotes();
       this.drawChurchModeScale(newValue, this.accidental);
+      this.checkIncludedScaleOfChord();
     },
     accidental: function(newValue) {
       this.setCenterScaleNotes();
       this.drawChurchModeScale(this.key, newValue);
+      this.checkIncludedScaleOfChord();
     },
     chordDisplay: function(newValue) {
       this.drawChurchModeScale(this.key, this.accidental);
+      this.checkIncludedScaleOfChord();
     },
     chordType: function(newValue) {
       this.drawChurchModeScale(this.key, this.accidental);
+      this.checkIncludedScaleOfChord();
     },
     keyScaleType: function(newValue) {
       // 表示しているタブも切り替え
@@ -664,6 +668,7 @@ export default {
 
       this.setCenterScaleNotes();
       this.drawChurchModeScale(this.key, this.accidental);
+      this.checkIncludedScaleOfChord();
     },
     checkChordData: function(newValue) {
       this.checkIncludedScaleOfChord();
@@ -688,7 +693,6 @@ export default {
     formatedChordName: {
       get: function() {
         let formatedQualityName = this.checkChordData.aliases.length > 0 ? this.checkChordData.aliases[0] : this.checkChordData.name;
-        console.log(formatedQualityName);
 
         // 表記方法を整形する
         switch(formatedQualityName) {

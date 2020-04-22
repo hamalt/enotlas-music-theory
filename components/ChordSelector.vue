@@ -66,7 +66,6 @@ export default {
   created() {
     // すべてのコード名を設定
     this.allChordTypes = ChordType.names();
-    console.log(this.allChordTypes);
 
     // 渡されたPropsをdataに保存
     this.chordTone = this.rootTone;
