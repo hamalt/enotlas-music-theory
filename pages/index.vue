@@ -95,9 +95,9 @@
             <!-- <div class="mode-results__source"></div> -->
             <div class="mode-results__modal-interchange">
               <h2 class="title is-3">
-                <b-icon icon="playlist-music" size="is-medium"></b-icon>Mode including
-                <small class="has-text-success" v-html="formatedChordName"></small> chord in
-                <small class="has-text-primary">{{tonicName}} {{ this.keyScaleType }} scale</small>
+                <b-icon icon="playlist-music" size="is-medium"></b-icon>
+                <span class="has-text-primary">{{tonicName}} {{ this.keyScaleType }} scale</span> mode including
+                <span class="has-text-success" v-html="formatedChordName"></span> chord.
               </h2>
               <p class="subtitle">(modal interchange)</p>
               <b-taglist v-if="0 < organizedIncludedScaleTypes.length">
@@ -110,6 +110,8 @@
               <p v-else>
                 <span class="has-text-danger">Not found.</span>
               </p>
+
+              <!-- TODO: Chord.chordScales("C7b9");を使って一覧も表示する？ -->
             </div>
 
             <div class="mode-results__mode-list">
@@ -192,6 +194,7 @@ export default {
       VF: Object,
       rendererWidth: 620,
       highlightColor:"#a22ad6",
+      checkChordColor: "#3cb371",
       scoreDisplayTab: 0
     };
   },
@@ -322,6 +325,9 @@ export default {
 
         // スケール外の音かを判定する用
         let notExistNote = false;
+
+        // チェックしたいコードと同じかを判定する用
+        let equaledCheckChord = false;
 
         // ダイアトニックノート設定用の変数
         let tones = [];
@@ -519,9 +525,13 @@ export default {
           }
 
           // ダイアトニックな音名設定
-          // console.log(diatonicChordTones);
           diatonicText = Chord.detect(diatonicChordTones);
-          // console.log(diatonicText);
+
+          // 設定したコードと同じかを判定
+          let checkChordNames = Chord.detect(this.checkChordData.notes);
+          if (checkChordNames[0] === diatonicText[0]) {
+            equaledCheckChord = true;
+          }
         } else {
           // 臨時記号が3つの場合
           if ("bbb" === noteData.acc || "###" === noteData.acc) {
@@ -567,6 +577,11 @@ export default {
           diatonicNotes[index].setStyle({fillStyle: this.highlightColor, strokeStyle: this.highlightColor});
         }
 
+        // 選択しているチェック用コードと同じなら音符の色を更に上書き
+        if (equaledCheckChord) {
+          diatonicNotes[index].setStyle({fillStyle: this.checkChordColor, strokeStyle: this.checkChordColor});
+        }
+
         // ダイアトニック名を設定
         // chordDisplayがtrueならdiatonicTextは配列（object）なので、一番目を設定し直す
         if (true === this.chordDisplay && "object" === typeof diatonicText) {
@@ -585,6 +600,11 @@ export default {
         // 特定の条件のとき、setStyleメソッドで色付けを行う
         if (notExistNote) {
           diatonicNames[index].setStyle({fillStyle: this.highlightColor, strokeStyle: this.highlightColor});
+        }
+
+        // 選択しているチェック用コードと同じなら名前の色を更に上書き
+        if (equaledCheckChord) {
+          diatonicNames[index].setStyle({fillStyle: this.checkChordColor, strokeStyle: this.checkChordColor});
         }
       }
 
@@ -671,6 +691,7 @@ export default {
       this.checkIncludedScaleOfChord();
     },
     checkChordData: function(newValue) {
+      this.drawChurchModeScale(this.key, this.accidental);
       this.checkIncludedScaleOfChord();
     }
   },
