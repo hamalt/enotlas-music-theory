@@ -27,15 +27,17 @@
     "@nuxtjs/dotenv": "^1.4.1",
     "@nuxtjs/gtm": "^2.2.3",
     "@nuxtjs/pwa": "^3.0.0-beta.20",
+    "@tonaljs/tonal": "^3.6.0",
     "nuxt": "^2.12.2",
     "nuxt-buefy": "^0.3.27",
-    "vue-scrollto": "^2.18.1"
+    "vexflow": "^3.0.9",
+    "vue-scrollto": "^2.18.1",
+    "sass-loader": "^8.0.2"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config": "^2.0.2",
     "@nuxtjs/eslint-module": "^1.1.0",
     "@nuxtjs/stylelint-module": "^3.2.2",
-    "@tonaljs/tonal": "^3.6.0",
     "babel-eslint": "^10.1.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.11.0",
@@ -47,11 +49,8 @@
     "npm-check-updates": "^4.1.2",
     "nuxt-webfontloader": "^1.1.0",
     "prettier": "^2.0.5",
-    "sanitize.css": "^11.0.0",
-    "sass-loader": "^8.0.2",
     "stylelint": "^13.3.3",
     "stylelint-config-standard": "^20.0.0",
-    "stylelint-scss": "^3.17.1",
-    "vexflow": "^3.0.9"
+    "stylelint-scss": "^3.17.1"
   }
 }

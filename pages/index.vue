@@ -188,6 +188,9 @@
 <script>
 import Vex from "vexflow";
 import { Note, Interval, Scale, Key, Chord, ChordType, Pcset } from "@tonaljs/tonal";
+// if (process.browser) {
+//   require("prismjs/themes/prism.css");
+// }
 import ChordSelector from "~/components/ChordSelector.vue";
 
 export default {
@@ -672,8 +675,6 @@ export default {
   mounted() {
     // DOM読み込み完了後にモードのスケールを描画
     this.drawChurchModeScale(this.key, this.accidental);
-
-    console.log(this.checkChordScales);
   },
   watch: {
     key: function(newValue) {
@@ -740,7 +741,6 @@ export default {
     },
     checkChordScales: {
       get: function() {
-        console.log(this.checkChordData.name);
         return Chord.chordScales(this.checkChordData.name);
       }
     },

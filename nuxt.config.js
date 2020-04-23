@@ -1,5 +1,5 @@
 export default {
-  mode: 'spa',
+  mode: 'universal',
   /*
    ** Headers of the page
    */
@@ -37,7 +37,10 @@ export default {
   /*
    ** Plugins to load before mounting the App
    */
-  // plugins: ['@/plugins/vexflow.js'],
+  // plugins: [{
+  //   src: '@/plugins/vexflow.js',
+  //   ssr: true
+  // }],
   /*
    ** Nuxt.js dev-modules
    */
@@ -81,7 +84,7 @@ export default {
      ** You can extend webpack config here
      */
     transpile: [
-      // "@nuxtjs/style-resources",
+      "vexflow",
       // "@nuxtjs/axios",
       // "nuxt-svg-loader",
       // "lodash/debounce",
@@ -93,27 +96,27 @@ export default {
       // "vue-infinite-loading"
       // "vue-disqus"
     ],
-    babel: {
-      presets: [
-        [
-          "@nuxt/babel-preset-app",
-          {
-            targets: {
-              ie: "11"
-            },
-            useBuiltIns: "usage",
-            corejs: {
-              version: 2
-            }
-          }
-        ]
-      ],
-      plugins: [
-        // "@babel/plugin-proposal-object-rest-spread"
-        "@babel/plugin-transform-shorthand-properties"
-      ],
-      sourceType: "unambiguous"
-    },
+    // babel: {
+    //   presets: [
+    //     [
+    //       "@nuxt/babel-preset-app",
+    //       {
+    //         targets: {
+    //           ie: "11"
+    //         },
+    //         useBuiltIns: "usage",
+    //         corejs: {
+    //           version: 2
+    //         }
+    //       }
+    //     ]
+    //   ],
+    //   plugins: [
+    //     // "@babel/plugin-proposal-object-rest-spread"
+    //     "@babel/plugin-transform-shorthand-properties"
+    //   ],
+    //   sourceType: "unambiguous"
+    // },
     extend(config, ctx) {}
   }
 }
