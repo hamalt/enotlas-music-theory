@@ -107,10 +107,23 @@
                   size="is-medium"
                 >{{tonicName}} {{ includedScaleName }}</b-tag>
               </b-taglist>
-              <p v-else>
+              <p v-else class="mode-results__not-modal">
                 <span class="has-text-danger">Not found.</span>
               </p>
 
+              <b-collapse :open="false" position="is-bottom" aria-id="contentIdForA11y1">
+                <a slot="trigger" slot-scope="props" aria-controls="contentIdForA11y1">
+                  <b-icon :icon="!props.open ? 'menu-down' : 'menu-up'"></b-icon>
+                  {{ !props.open ? 'Show all scales that chord fits' : 'hide' }}
+                </a>
+                <b-taglist v-if="0 < checkChordScales.length">
+                  <b-tag
+                    v-for="checkChordScale in checkChordScales"
+                    :key="'included-' + getHyphenFillName(checkChordScale)"
+                    size="is-medium"
+                  >{{ checkChordScale }}</b-tag>
+                </b-taglist>
+              </b-collapse>
               <!-- TODO: Chord.chordScales("C7b9");を使って一覧も表示する？ -->
             </div>
 
@@ -647,6 +660,8 @@ export default {
   mounted() {
     // DOM読み込み完了後にモードのスケールを描画
     this.drawChurchModeScale(this.key, this.accidental);
+
+    console.log(this.checkChordScales);
   },
   watch: {
     key: function(newValue) {
@@ -709,6 +724,12 @@ export default {
     organizedIncludedScaleTypes: {
       get: function() {
           return Array.from(new Set(this.includedScaleTypes));
+      }
+    },
+    checkChordScales: {
+      get: function() {
+        console.log(this.checkChordData.name);
+        return Chord.chordScales(this.checkChordData.name);
       }
     },
     formatedChordName: {
@@ -793,6 +814,10 @@ export default {
 
   &__modal-interchange {
     margin-bottom: 3rem;
+  }
+
+  &__not-modal {
+    margin-bottom: 1rem;
   }
 
   &__mode-list-description {
