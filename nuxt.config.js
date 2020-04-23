@@ -58,7 +58,10 @@ export default {
     ['nuxt-buefy', {
       css: false,
     }],
-    'nuxt-webfontloader'
+    'nuxt-webfontloader',
+    ['vue-scrollto/nuxt', {
+      duration: 300
+    }],
   ],
   webfontloader: {
     google: {

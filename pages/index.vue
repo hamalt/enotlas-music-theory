@@ -8,6 +8,96 @@
     </section>
 
     <div class="mode-contents">
+      <div class="mode-contents__results">
+        <section class="section">
+          <div class="mode-results">
+            <!-- <div class="mode-results__source"></div> -->
+            <div class="mode-results__modal-interchange">
+              <h2 class="title is-3">
+                <b-icon icon="playlist-music" size="is-medium"></b-icon>
+                <span class="has-text-primary">{{tonicName}} {{ this.keyScaleType }} scale</span> mode including
+                <span class="has-text-success" v-html="formatedChordName"></span> chord.
+              </h2>
+              <p class="subtitle">Click mode name. Find modal interchange.</p>
+              <div class="buttons" v-if="0 < organizedIncludedScaleTypes.length">
+                <b-button
+                  v-for="includedScaleName in organizedIncludedScaleTypes"
+                  :key="'included-' + getFormatIdName(includedScaleName)"
+                  :id="'included-' + getFormatIdName(includedScaleName)"
+                  tag="a"
+                  href="#"
+                  :data-scroll="'#scale-' + getFormatIdName(keyScaleType) + '-' + getFormatIdName(includedScaleName)"
+                  v-scroll-to="'#scale-' + getFormatIdName(keyScaleType) + '-' + getFormatIdName(includedScaleName)"
+                  type="is-dark"
+                >{{tonicName}} {{ includedScaleName }}</b-button>
+              </div>
+              <p v-else class="mode-results__not-modal">
+                <span class="has-text-danger">Not found.</span>
+              </p>
+
+              <b-collapse :open="false" position="is-bottom" aria-id="contentIdForA11y1">
+                <a slot="trigger" slot-scope="props" aria-controls="contentIdForA11y1">
+                  <b-icon :icon="!props.open ? 'menu-down' : 'menu-up'"></b-icon>
+                  {{ !props.open ? 'Show all scales that chord fits' : 'hide' }}
+                </a>
+                <b-taglist v-if="0 < checkChordScales.length">
+                  <b-tag
+                    v-for="checkChordScale in checkChordScales"
+                    :key="'included-' + getFormatIdName(checkChordScale)"
+                    size="is-medium"
+                  >{{ checkChordScale }}</b-tag>
+                </b-taglist>
+              </b-collapse>
+            </div>
+
+            <div class="mode-results__mode-list">
+              <div class="scale-scores">
+                <div class="mode-results__mode-list-description">
+                  <h2 class="title is-3">
+                    <b-icon icon="playlist-music" size="is-medium"></b-icon>
+                    <span class="has-text-primary">{{ keyScaleName }} scale</span> Parallel modes
+                  </h2>
+                  <p class="subtitle">
+                    <i class="has-background-secondary"></i>
+                    <span class="has-text-secondary">Color</span> - modal interchange chord
+                  </p>
+                </div>
+                <b-tabs v-model="scoreDisplayTab">
+                  <template v-for="(scaleTypeData, scaleName) in scaleTypeDatas">
+                    <b-tab-item
+                      :label="scaleName"
+                      :key="scaleName"
+                      :id="getFormatIdName(scaleName)"
+                    >
+                      <div
+                        class="scale"
+                        v-for="scaleData in scaleTypeData"
+                        :key="scaleData.name"
+                        :id="'scale-' + scaleData.id"
+                      >
+                        <div class="scale__name">
+                          <h3 class="is-size-4">{{tonicName}} {{ scaleData.title }}</h3>
+                          <span
+                            v-for="alias in scaleData.aliases"
+                            :key="alias"
+                            class="scale__alias"
+                          >
+                            <small>{{tonicName}} {{ alias }} scale</small>
+                          </span>
+                        </div>
+                        <div :id="scaleData.id" class="scale__score"></div>
+                      </div>
+                    </b-tab-item>
+                  </template>
+                </b-tabs>
+              </div>
+              <!-- .scale-scores -->
+            </div>
+          </div>
+        </section>
+      </div>
+      <!-- .mode-contents__results -->
+
       <div class="mode-contents__utility">
         <section class="section">
           <div class="operation-boards">
@@ -89,86 +179,6 @@
         </section>
       </div>
       <!-- .mode-contents__utility -->
-      <div class="mode-contents__results">
-        <section class="section">
-          <div class="mode-results">
-            <!-- <div class="mode-results__source"></div> -->
-            <div class="mode-results__modal-interchange">
-              <h2 class="title is-3">
-                <b-icon icon="playlist-music" size="is-medium"></b-icon>
-                <span class="has-text-primary">{{tonicName}} {{ this.keyScaleType }} scale</span> mode including
-                <span class="has-text-success" v-html="formatedChordName"></span> chord.
-              </h2>
-              <p class="subtitle">(modal interchange)</p>
-              <b-taglist v-if="0 < organizedIncludedScaleTypes.length">
-                <b-tag
-                  v-for="includedScaleName in organizedIncludedScaleTypes"
-                  :key="'included-' + getHyphenFillName(includedScaleName)"
-                  size="is-medium"
-                >{{tonicName}} {{ includedScaleName }}</b-tag>
-              </b-taglist>
-              <p v-else class="mode-results__not-modal">
-                <span class="has-text-danger">Not found.</span>
-              </p>
-
-              <b-collapse :open="false" position="is-bottom" aria-id="contentIdForA11y1">
-                <a slot="trigger" slot-scope="props" aria-controls="contentIdForA11y1">
-                  <b-icon :icon="!props.open ? 'menu-down' : 'menu-up'"></b-icon>
-                  {{ !props.open ? 'Show all scales that chord fits' : 'hide' }}
-                </a>
-                <b-taglist v-if="0 < checkChordScales.length">
-                  <b-tag
-                    v-for="checkChordScale in checkChordScales"
-                    :key="'included-' + getHyphenFillName(checkChordScale)"
-                    size="is-medium"
-                  >{{ checkChordScale }}</b-tag>
-                </b-taglist>
-              </b-collapse>
-              <!-- TODO: Chord.chordScales("C7b9");を使って一覧も表示する？ -->
-            </div>
-
-            <div class="mode-results__mode-list">
-              <div class="scale-scores">
-                <div class="mode-results__mode-list-description">
-                  <h2 class="title is-3">
-                    <b-icon icon="playlist-music" size="is-medium"></b-icon>
-                    <span class="has-text-primary">{{ keyScaleName }} scale</span> Parallel modes
-                  </h2>
-                  <p class="subtitle">
-                    <i class="has-background-secondary"></i>
-                    <span class="has-text-secondary">Color</span> - modal interchange chord
-                  </p>
-                </div>
-                <b-tabs v-model="scoreDisplayTab">
-                  <template v-for="(scaleTypeData, scaleName) in scaleTypeDatas">
-                    <b-tab-item
-                      :label="scaleName"
-                      :key="scaleName"
-                      :id="getHyphenFillName(scaleName)"
-                    >
-                      <div class="scale" v-for="scaleData in scaleTypeData" :key="scaleData.name">
-                        <div class="scale__name">
-                          <h3 class="is-size-4">{{tonicName}} {{ scaleData.title }}</h3>
-                          <span
-                            v-for="alias in scaleData.aliases"
-                            :key="alias"
-                            class="scale__alias"
-                          >
-                            <small>{{tonicName}} {{ alias }} scale</small>
-                          </span>
-                        </div>
-                        <div :id="scaleData.id" class="scale__score"></div>
-                      </div>
-                    </b-tab-item>
-                  </template>
-                </b-tabs>
-              </div>
-              <!-- .scale-scores -->
-            </div>
-          </div>
-        </section>
-      </div>
-      <!-- .mode-contents__results -->
     </div>
     <!-- .mode-contents -->
   </div>
@@ -215,8 +225,10 @@ export default {
     /**
      * 半角スペースをハイフンに変換して取得
      */
-    getHyphenFillName(str) {
-      return str.replace(" ", "-");
+    getFormatIdName(str) {
+      str = str.replace(" ", "-");
+      str = str.replace("#", "sharp");
+      return str;
     },
     /**
      * 楽譜描画用の要素IDを取得
@@ -239,7 +251,7 @@ export default {
             // var aliasName = scaleProperties.aliases.length > 0 ? " (" + scaleProperties.aliases[0] + ")" : "";
             var titleText = scaleProperties.name + " scale";
             var scaleId = this.getModeId(modeName[1], scaleProperties.aliases, scaleType);
-            this.scaleTypeDatas[scaleType][index] = { id: scaleId, name: modeName[1], title: titleText, aliases: scaleProperties.aliases };
+            this.scaleTypeDatas[scaleType][index] = { id: this.getFormatIdName(scaleId), name: modeName[1], title: titleText, aliases: scaleProperties.aliases };
         }
       }
     },
