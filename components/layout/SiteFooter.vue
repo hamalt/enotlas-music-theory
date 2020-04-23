@@ -19,7 +19,7 @@
                 </p>
               </div>
               <div class="site-footer__library">
-                <h4>使ってるライブラリ</h4>
+                <h4>使用しているプログラム</h4>
                 <ul>
                   <li>
                     <a href="https://www.vexflow.com/" target="_blank">VexFlow</a>
